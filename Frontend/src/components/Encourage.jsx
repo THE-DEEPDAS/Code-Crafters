@@ -64,6 +64,11 @@ const Encourage = () => {
   const [socket, setSocket] = useState(null);
   const [error, setError] = useState(null);
   const [loading, setLoading] = useState(true);
+  const [showMetricsForm, setShowMetricsForm] = useState(false);
+  const [newMetrics, setNewMetrics] = useState({
+    recycledCups: '',
+    dailyCupUsage: ''
+  });
 
   const milestones = [100, 500, 1000, 5000, 10000];
   const nextMilestone = milestones.find(m => m > (userData?.recycledCups || 0)) || 'Max Level!';
@@ -119,6 +124,22 @@ const Encourage = () => {
       }
     } catch (error) {
       console.error('Error sharing:', error);
+    }
+  };
+
+  const changeMetrics = async (e) => {
+    e.preventDefault();
+    const token = localStorage.getItem('token');
+    try {
+      const response = await axios.patch('http://localhost:3000/api/update-stats', newMetrics, {
+        headers: { Authorization: `Bearer ${token}` }
+      });
+      setStats(calculateStats(response.data.recycledCups));
+      setUserData({ ...userData, ...response.data });
+      setShowMetricsForm(false);
+    } catch (error) {
+      console.error('Error changing metrics:', error.response || error);
+      setError(error.response?.data?.message || 'An unexpected error occurred.');
     }
   };
 
@@ -292,7 +313,7 @@ const Encourage = () => {
               Your Green Journey
             </h1>
             <p className="text-xl text-green-600 italic">
-              {quotes[Math.floor(Math.random() * quotes.length)]}
+              {userData?.username}, {quotes[Math.floor(Math.random() * quotes.length)]}
             </p>
           </motion.div>
 
@@ -344,6 +365,40 @@ const Encourage = () => {
                 </div>
               </div>
             </div>
+            <button 
+              onClick={() => setShowMetricsForm(true)}
+              className="mt-4 bg-green-500 text-white px-4 py-2 rounded hover:bg-green-600"
+            >
+              Change Metrics
+            </button>
+            {showMetricsForm && (
+              <form onSubmit={changeMetrics} className="mt-4">
+                <div className="mb-4">
+                  <label className="block text-gray-700">Recycled Cups</label>
+                  <input
+                    type="number"
+                    value={newMetrics.recycledCups}
+                    onChange={(e) => setNewMetrics({ ...newMetrics, recycledCups: e.target.value })}
+                    className="mt-1 block w-full px-3 py-2 bg-white border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-green-500 focus:border-green-500 sm:text-sm"
+                  />
+                </div>
+                <div className="mb-4">
+                  <label className="block text-gray-700">Daily Cup Usage</label>
+                  <input
+                    type="number"
+                    value={newMetrics.dailyCupUsage}
+                    onChange={(e) => setNewMetrics({ ...newMetrics, dailyCupUsage: e.target.value })}
+                    className="mt-1 block w-full px-3 py-2 bg-white border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-green-500 focus:border-green-500 sm:text-sm"
+                  />
+                </div>
+                <button
+                  type="submit"
+                  className="bg-green-500 text-white px-4 py-2 rounded hover:bg-green-600"
+                >
+                  Update Metrics
+                </button>
+              </form>
+            )}
           </motion.div>
 
           {/* Charts */}
