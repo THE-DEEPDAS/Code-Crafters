@@ -1,7 +1,17 @@
 import BaseLayout from "../Layouts/BaseLayout"
 import { Coffee, Trash, ChevronLeft, ChevronRight, Cloud } from "lucide-react"
 import { useEffect, useState, useRef } from "react"
-
+import nature1 from "../assets/nature1.avif";
+import nature2 from "../assets/nature2.webp";
+import nature3 from "../assets/nature3.jpg";
+import nature4 from "../assets/nature4.jpg";
+import nature5 from "../assets/nature5.jpg";
+import nature6 from "../assets/nature6.jpg";
+import nature7 from "../assets/nature7.jpeg";
+import nature8 from "../assets/nature8.jpg";
+import nature9 from "../assets/nature9.avif";
+import nature10 from "../assets/nature10.jpg"
+import nature11 from "../assets/nature11.jpg"
 export default function Home() {
   const [cupsCount, setCupsCount] = useState(0)
   const [treesCount, setTreesCount] = useState(0)
@@ -14,13 +24,27 @@ export default function Home() {
   const [showCongrats, setShowCongrats] = useState(false)
   const [pledgeStartTime, setPledgeStartTime] = useState(null)
   const [remainingTime, setRemainingTime] = useState(30)
-  const [isPledgeSectionVisible, setIsPledgeSectionVisible] = useState(false) // Update 1
+  const [isPledgeSectionVisible, setIsPledgeSectionVisible] = useState(false) 
+  const [currentSlide, setCurrentSlide] = useState(0)
 
   const cupsRef = useRef(null)
   const treesRef = useRef(null)
   const carcinogenRef = useRef(null)
   const pledgeRef = useRef(null)
   const timerRef = useRef(null)
+
+  const slides = [
+    nature1, nature2,nature10, nature4, 
+    nature5, nature3,nature11, nature7, nature8, nature9
+  ];
+  
+  useEffect(() => {
+    const intervalId = setInterval(() => {
+      setCurrentSlide((prev) => (prev + 1) % slides.length)
+    }, 3000)
+
+    return () => clearInterval(intervalId)
+  }, [])
 
   useEffect(() => {
     const observerCallback = (entries) => {
@@ -200,27 +224,22 @@ export default function Home() {
 
   return (
     <BaseLayout>
-      <section className="relative h-screen flex items-center justify-center overflow-hidden bg-white ">
-        {/* Background Slideshow */}
+      <section className="relative h-screen flex items-center justify-center overflow-hidden bg-white">
         <div className="absolute inset-0">
-          <div className="slideshow">
-            <div className="slide bg-[url('../assets/nature1.avif')]"></div>
-            <div className="slide bg-[url('../assets/nature2.webp')]"></div>
-            <div className="slide bg-[url('../assets/nature3.jpg')]"></div>
-            <div className="slide bg-[url('../assets/nature4.jpg')]"></div>
-            <div className="slide bg-[url('../assets/nature5.jpg')]"></div>
-            <div className="slide bg-[url('../assets/nature6.jpg')]"></div>
-            <div className="slide bg-[url('../assets/nature7.jpeg')]"></div>
-            <div className="slide bg-[url('../assets/nature9.avif')]"></div>
-            <div className="slide bg-[url('../assets/nature8.jpg')]"></div>
+          <div className="absolute inset-0 overflow-hidden opacity-70 bg-[rgba(0,0,0,0.5)]">
+            {slides.map((slide, index) => (
+              <div 
+                key={slide}
+                className={`absolute inset-0 bg-cover bg-center transition-opacity duration-1000 
+                  ${index === currentSlide ? 'opacity-100' : 'opacity-0'}`}
+                style={{backgroundImage: `url('${slide}')`}}
+              />
+            ))}
           </div>
         </div>
 
-        {/* Text Content */}
+        {/* Rest of the section content remains the same */}
         <div className="relative z-10 text-center max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-    <BaseLayout overrides={{ div: {backgroundOpacity: 0} }}>
-      <section className="flex flex-row bg-amber-100">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-32 pb-48">
           <h1 className="text-5xl md:text-7xl font-bold text-blue-400 mb-6">
             BE THE
             <span className="bg-gradient-to-r from-emerald-400 to-green-500 bg-clip-text text-transparent">
@@ -228,50 +247,14 @@ export default function Home() {
               CHANGE!
             </span>
           </h1>
-          <h1 className="text-3xl/10 text-black-400 max-w-2xl mb-8 py-4 font-bold">
+          <h1 className="text-3xl/10 text-white max-w-2xl mb-8 py-4 font-bold">
             Building a sustainable future through innovative solutions and responsible development. Join us in creating
             a better world for generations to come.
           </h1>
         </div>
 
-        {/* Overlay */}
         <div className="absolute inset-0 bg-black opacity-30"></div>
       </section>
-
-      <style>
-        {`
-          .slideshow {
-            position: absolute;
-            inset: 0;
-            display: flex;
-            animation: slide 27s infinite; /* 9 slides, 3s each */
-          }
-
-          .slide {
-            position: absolute;
-            inset: 0;
-            background-size: cover;
-            background-position: center;
-            opacity: 0;
-            animation: fade 27s infinite;
-          }
-
-          .slide:nth-child(1) { animation-delay: 0s; }
-          .slide:nth-child(2) { animation-delay: 3s; }
-          .slide:nth-child(3) { animation-delay: 6s; }
-          .slide:nth-child(4) { animation-delay: 9s; }
-          .slide:nth-child(5) { animation-delay: 12s; }
-          .slide:nth-child(6) { animation-delay: 15s; }
-          .slide:nth-child(7) { animation-delay: 18s; }
-          .slide:nth-child(8) { animation-delay: 21s; }
-          .slide:nth-child(9) { animation-delay: 24s; }
-
-          @keyframes fade {
-            0%, 100% { opacity: 0; }
-            10%, 90% { opacity: 1; }
-          }
-        `}
-      </style>
 
       <section className="py-24 backdrop-blur-sm bg-[#00cc8c]">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
