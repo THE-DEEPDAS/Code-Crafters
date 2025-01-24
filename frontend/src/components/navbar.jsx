@@ -18,7 +18,15 @@ const Navbar = () => {
 						>
 							Insights
 						</Link>
-					</li>
+          </li>
+          <li>
+						<Link
+							to='/encourage'
+							className='text-white hover:text-blue-200 font-bold'
+						>
+							Encourage
+						</Link>
+          </li>
 					<li>
 						<a
 							href='https://cup-karma-insights.streamlit.app'
