@@ -391,12 +391,12 @@ export default function Home() {
           >
             Take Pledge
           </button>
-          {pledgeMessage && <div className="mt-4 text-lg text-black font-bold">
+          {pledgeMessage && <div className="mt-4 text-2xl text-black">
             <p>{pledgeMessage}</p>
             <p>Stay on this section for 30 seconds to confirm your commitment.</p>
             </div>}
           {showCongrats && (
-            <p className="mt-4 text-2xl font-bold text-emerald-600">
+            <p className="mt-4 text-2xl font-bold text-black">
               Congratulations, you have successfully taken the pledge!
             </p>
           )}
