@@ -1,6 +1,4 @@
 import { Link } from "react-router-dom"
-import Insights from "../components/insights"
-import ContactPage from "../components/ContactPage";  // Update import path
 
 const Navbar = () => {
   return (

@@ -1,21 +1,24 @@
 import React from 'react';
 import { Mail, Phone, MapPin, Github, Linkedin, Twitter, MessageSquare, Clock, Globe2, Code, Palette, Database } from 'lucide-react';
 import TeamMemberCard from './TeamMemberCard';
+import deep from '../../public/deep.jpg';
+import kuruv from '../../public/kuruv.jpg'
+import hitarth from '../../public/hitarth.jpg'
 
 const ContactPage = () => {
   return (
     <div className="min-h-screen bg-gray-50 overflow-hidden">
       {/* Hero Section with animated gradient background */}
-      <div className="relative animate-gradient-x bg-gradient-to-r from-[rgb(0,212,142)] via-[rgb(0,182,122)] to-[rgb(0,212,142)] text-white py-32">
+      <div className="relative animate-gradient-x bg-gradient-to-r from-[rgb(0,212,142)] via-[rgb(0,182,122)] to-[rgb(0,212,142)] text-white pb-40 pt-32">
         <div className="absolute inset-0 bg-[url('https://images.unsplash.com/photo-1557683316-973673baf926?auto=format&fit=crop&q=80')] opacity-10 mix-blend-overlay"></div>
         <div className="container mx-auto px-4 relative">
           <h1 className="text-6xl md:text-7xl font-bold text-center mb-8 animate-float">
             Get in Touch
           </h1>
-          <p className="text-2xl text-center max-w-3xl mx-auto opacity-90">
+          <p className="text-2xl text-center max-w-3xl mx-auto opacity-90 mb-20">
             We're here to help and answer any questions you might have. We look forward to hearing from you!
           </p>
-          <div className="absolute -bottom-16 left-1/2 transform -translate-x-1/2">
+          <div className="absolute -bottom-40 left-1/2 transform -translate-x-1/2">
             <div className="w-32 h-32 rounded-full bg-white shadow-lg flex items-center justify-center animate-bounce">
               <MessageSquare className="w-16 h-16 text-[rgb(0,212,142)]" />
             </div>
@@ -24,12 +27,12 @@ const ContactPage = () => {
       </div>
 
       {/* Contact Information */}
-      <div className="container mx-auto px-4 pt-32 pb-16">
+      <div className="container mx-auto px-4 pt-56 pb-16">
         <div className="grid grid-cols-1 md:grid-cols-3 gap-8 mb-16">
           {[
-            { icon: Mail, title: 'Email Us', lines: ['contact@example.com', 'support@example.com'] },
-            { icon: Phone, title: 'Call Us', lines: ['+1 (555) 123-4567', 'Mon-Fri: 9:00 AM - 6:00 PM'] },
-            { icon: MapPin, title: 'Visit Us', lines: ['123 Innovation Drive', 'Tech Valley, CA 94043'] }
+            { icon: Mail, title: 'Email Us', lines: ['deepdblm@outlook.com', 'u23ai052@coed.svnit.ac.in'] },
+            { icon: Phone, title: 'Call Us', lines: ['+91 99740 19394', 'Mon-Fri: 9:00 AM - 6:00 PM'] },
+            { icon: MapPin, title: 'Visit Us', lines: ['Sardar Vallabhbhai National Institute of Technology, Surat - 395007'] }
           ].map((item, index) => (
             <div key={index} className="relative group animate-slide-up" style={{ animationDelay: `${index * 200}ms` }}>
               <div className="absolute inset-0 bg-[rgb(0,212,142)] rounded-lg transform transition-all duration-300 group-hover:scale-105 opacity-0 group-hover:opacity-5"></div>
@@ -83,21 +86,21 @@ const ContactPage = () => {
               {
                 name: 'Deep Das',
                 role: 'AI Developer',
-                image: 'https://images.unsplash.com/photo-1568602471122-7832951cc4c5?auto=format&fit=crop&q=80&w=200&h=200',
+                image: deep,
                 description: 'Deep is an expert in artificial intelligence and machine learning, with a passion for solving complex problems.',
                 Icon: Code
               },
               {
                 name: 'Kuruv Patel',
                 role: 'Backend Developer',
-                image: 'https://images.unsplash.com/photo-1494790108377-be9c29b29330?auto=format&fit=crop&q=80&w=200&h=200',
+                image: kuruv,
                 description: 'Kuruv specializes in building scalable backend systems and has architected solutions for Fortune 500 companies.',
                 Icon: Palette
               },
               {
                 name: 'Hitarth Shah',
                 role: 'Frontend Developer',
-                image: 'https://images.unsplash.com/photo-1519085360753-af0119f7cbe7?auto=format&fit=crop&q=80&w=200&h=200',
+                image: hitarth,
                 description: 'Hitarth the ultimate Frontend guy you may imagine.',
                 Icon: Database
               }
