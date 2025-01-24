@@ -1,5 +1,6 @@
 import React from "react"
 import { Link } from "react-router-dom"
+import Insights from "../components/insights"
 
 const Navbar = () => {
   return (
@@ -12,14 +13,14 @@ const Navbar = () => {
             </Link>
           </li>
           <li>
-            <Link to="/purpose" className="text-white hover:text-blue-200 font-bold">
-              Purpose
+            <Link to="/insights" className="text-white hover:text-blue-200 font-bold">
+              Insights
             </Link>
           </li>
           <li>
-            <Link to="/recommendations" className="text-white hover:text-blue-200 font-bold">
+            <a href="https://cup-karma-insights.streamlit.app" rel="noopener noreferrer" className="text-white hover:text-blue-200 font-bold">
               Recommendations
-            </Link>
+            </a>
           </li>
           <li>
             <Link to="/contact" className="text-white hover:text-blue-200 font-bold">
