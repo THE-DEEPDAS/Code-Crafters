@@ -18,6 +18,7 @@ import html2canvas from 'html2canvas';
 import { QRCodeSVG } from 'qrcode.react';  // Change this line
 import BaseLayout from '../Layouts/BaseLayout';
 import { io } from 'socket.io-client';
+import { useNavigate } from 'react-router-dom';
 
 // Register ChartJS components
 ChartJS.register(
@@ -33,6 +34,16 @@ ChartJS.register(
 );
 
 const Encourage = () => {
+  const navigate = useNavigate();
+  
+  useEffect(() => {
+    const token = localStorage.getItem('token');
+    if (!token) {
+      navigate('/signin');
+      return;
+    }
+  }, [navigate]);
+
   const [userData, setUserData] = useState(null);
   const [leaderboard, setLeaderboard] = useState([]);
   const [achievements, setAchievements] = useState([]);
@@ -174,7 +185,7 @@ const Encourage = () => {
     datasets: [{
       label: 'Cups Recycled',
       data: leaderboard.map(user => user.recycledCups),
-      backgroundColor: 'rgba(75, 192, 192, 0.5)',
+      backgroundColor: 'rgba(75, 192, 192, 0.5)'
     }]
   };
 
