@@ -4,7 +4,7 @@ import Navbar from "../components/navbar";
 
 const BaseLayout = ({ children }) => {
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen bg-[#00cc8c]">
       <Navbar />
       {children}
     </div>

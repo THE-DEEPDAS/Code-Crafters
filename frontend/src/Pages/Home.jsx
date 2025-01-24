@@ -200,8 +200,24 @@ export default function Home() {
 
   return (
     <BaseLayout>
-      <section className="flex flex-row">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-32 pb-48">
+      <section className="relative h-screen flex items-center justify-center overflow-hidden bg-white ">
+        {/* Background Slideshow */}
+        <div className="absolute inset-0">
+          <div className="slideshow">
+            <div className="slide bg-[url('../assets/nature1.avif')]"></div>
+            <div className="slide bg-[url('../assets/nature2.webp')]"></div>
+            <div className="slide bg-[url('../assets/nature3.jpg')]"></div>
+            <div className="slide bg-[url('../assets/nature4.jpg')]"></div>
+            <div className="slide bg-[url('../assets/nature5.jpg')]"></div>
+            <div className="slide bg-[url('../assets/nature6.jpg')]"></div>
+            <div className="slide bg-[url('../assets/nature7.jpeg')]"></div>
+            <div className="slide bg-[url('../assets/nature9.avif')]"></div>
+            <div className="slide bg-[url('../assets/nature8.jpg')]"></div>
+          </div>
+        </div>
+
+        {/* Text Content */}
+        <div className="relative z-10 text-center max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <h1 className="text-5xl md:text-7xl font-bold text-blue-400 mb-6">
             BE THE
             <span className="bg-gradient-to-r from-emerald-400 to-green-500 bg-clip-text text-transparent">
@@ -214,7 +230,46 @@ export default function Home() {
             a better world for generations to come.
           </h1>
         </div>
+
+        {/* Overlay */}
+        <div className="absolute inset-0 bg-black opacity-30"></div>
       </section>
+
+      <style>
+        {`
+          .slideshow {
+            position: absolute;
+            inset: 0;
+            display: flex;
+            animation: slide 27s infinite; /* 9 slides, 3s each */
+          }
+
+          .slide {
+            position: absolute;
+            inset: 0;
+            background-size: cover;
+            background-position: center;
+            opacity: 0;
+            animation: fade 27s infinite;
+          }
+
+          .slide:nth-child(1) { animation-delay: 0s; }
+          .slide:nth-child(2) { animation-delay: 3s; }
+          .slide:nth-child(3) { animation-delay: 6s; }
+          .slide:nth-child(4) { animation-delay: 9s; }
+          .slide:nth-child(5) { animation-delay: 12s; }
+          .slide:nth-child(6) { animation-delay: 15s; }
+          .slide:nth-child(7) { animation-delay: 18s; }
+          .slide:nth-child(8) { animation-delay: 21s; }
+          .slide:nth-child(9) { animation-delay: 24s; }
+
+          @keyframes fade {
+            0%, 100% { opacity: 0; }
+            10%, 90% { opacity: 1; }
+          }
+        `}
+      </style>
+
       <section className="py-24 backdrop-blur-sm bg-[#00cc8c]">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <h2 className="text-4xl font-bold text-center text-white mb-16">The Environmental Impact</h2>
@@ -331,7 +386,7 @@ export default function Home() {
       </section>
 
       {/* Scrollable Facts Section */}
-      <section className="py-24 ">
+      <section className="py-24 bg-[#f9fafb] ">
         <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 relative">
           {/* Navigation Dots */}
           <div className="absolute right-0 top-1/2 -translate-y-1/2 flex flex-col gap-4">
