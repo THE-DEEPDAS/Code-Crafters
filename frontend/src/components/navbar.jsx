@@ -1,6 +1,6 @@
-
 import { Link } from "react-router-dom"
 import Insights from "../components/insights"
+import ContactPage from "../components/ContactPage";  // Update import path
 
 const Navbar = () => {
   return (
@@ -23,7 +23,7 @@ const Navbar = () => {
             </a>
           </li>
           <li>
-            <Link to="/contact" className="text-white hover:text-blue-200 font-bold">
+            <Link to="/contact" className="text-white hover:text-blue-200 font-bold">  
               Contact
             </Link>
           </li>
