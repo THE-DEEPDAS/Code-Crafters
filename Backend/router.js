@@ -3,6 +3,7 @@ const bcrypt = require("bcryptjs");
 const jwt = require("jsonwebtoken");
 const User = require("./models/User"); // Corrected path
 const auth = require("./middleware/auth");
+const achievementController = require('./controllers/achievementController');
 
 const router = express.Router();
 
@@ -142,7 +143,7 @@ router.get("/user/:id", auth, async (req, res) => {
     const user = await User.findById(req.params.id);
     if (!user) {
       return res.status(404).json({ message: "User not found" });
-    }
+    } 
     res.json({
       recycledCups: user.recycledCups,
       dailyCupUsage: user.dailyCupUsage,
@@ -170,5 +171,26 @@ router.get("/user/:username", auth, async (req, res) => {
     res.status(500).json({ message: "Server error", error: error.message });
   }
 });
+
+// Stats Routes
+router.get("/stats/user/:id", auth, async (req, res) => {
+  try {
+    const user = await User.findById(req.params.id || req.user.id);
+    if (!user) {
+      return res.status(404).json({ message: "User not found" });
+    }
+    res.json({
+      recycledCups: user.recycledCups,
+      dailyCupUsage: user.dailyCupUsage,
+      streak: user.streak,
+      weeklyProgress: user.weeklyProgress || [0, 0, 0, 0]
+    });
+  } catch (error) {
+    res.status(500).json({ message: "Server error", error: error.message });
+  }
+});
+
+router.get("/stats/leaderboard", auth, achievementController.getLeaderboard);
+router.get("/stats/achievements", auth, achievementController.getUserAchievements);
 
 module.exports = router;

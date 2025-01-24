@@ -1,7 +1,7 @@
 const Achievement = require('../models/Achievement');
 const User = require('../models/User');
 const { createCertificate } = require('../utils/certificateGenerator');
-const io = require('socket.io-instance');
+const socketIO = require('../socket');
 
 const MILESTONES = [100, 500, 1000, 5000, 10000];
 
@@ -72,6 +72,7 @@ exports.updateUserStats = async (req, res) => {
       { $project: { username: 1, recycledCups: 1, streak: 1 } }
     ]);
     
+    const io = socketIO.getIO();
     io.to('leaderboard').emit('leaderboardUpdate', leaderboard);
 
     res.json({
