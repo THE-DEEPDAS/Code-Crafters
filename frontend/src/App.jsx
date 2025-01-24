@@ -1,12 +1,13 @@
-import Navbar from "./components/navbar";
+import { Route, Routes } from "react-router-dom";
 
+import Home from "./Pages/Home";
 export default function App() {
   return (
-    <>
-    <div className="bg-[#394032] max-h-fit min-h-screen top-0 absolute w-full">
-      <Navbar/>
+    <div>
+      <Routes>
+        <Route path='/' element={<Home/>}/>
+      </Routes>
     </div>
-    </>
     
   );
 }
