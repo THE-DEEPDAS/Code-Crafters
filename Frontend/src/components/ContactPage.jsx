@@ -1,9 +1,9 @@
 import React from 'react';
 import { Mail, Phone, MapPin, Github, Linkedin, Twitter, MessageSquare, Clock, Globe2, Code, Palette, Database } from 'lucide-react';
 import TeamMemberCard from './TeamMemberCard';
-import deep from '../../public/deep.jpg';
-import kuruv from '../../public/kuruv.jpg'
-import hitarth from '../../public/hitarth.jpg'
+import deep from '../Assets/deep.jpg';
+import kuruv from '../Assets/kuruv.jpg';
+import hitarth from '../Assets/hitarth.jpg';
 
 const ContactPage = () => {
   return (

@@ -34,14 +34,14 @@ class FeedbackGenerator:
         self.daily_usage_messages = [
             "Using {daily} cups daily adds up to {yearly} cups yearly. Try reducing it by one cup this week! 🎯",
             "Your daily usage of {daily} cups contributes to {yearly} cups annually. Small changes make big impacts! ⭐",
-            "With {daily} cups daily, you could save ${yearly_cost:.2f} yearly by switching to a reusable cup! 💰",
+            "With {daily} cups daily, you could save ₹{yearly_cost:.2f} yearly by switching to a reusable cup! 💰",
             "Reducing your daily usage of {daily} cups can save {yearly} cups annually. Give it a try! 🌟",
             "By cutting down to {daily} cups daily, you can save {yearly} cups each year. Every bit helps! 🌠",
-            "Switching to a reusable cup for {daily} daily uses can save you ${yearly_cost:.2f} annually! 💵",
+            "Switching to a reusable cup for {daily} daily uses can save you ₹{yearly_cost:.2f} annually! 💵",
             "Try reducing your daily cup usage to {daily} cups. It adds up to {yearly} cups yearly! 🌠",
-            "Cutting down to {daily} cups daily can save you ${yearly_cost:.2f} each year. Start today! 💲",
+            "Cutting down to {daily} cups daily can save you ₹{yearly_cost:.2f} each year. Start today! 💲",
             "Using {daily} cups daily means {yearly} cups yearly. Reduce it and make a difference! 🌟",
-            "Switch to a reusable cup for {daily} daily uses and save ${yearly_cost:.2f} annually! 💸"
+            "Switch to a reusable cup for {daily} daily uses and save ₹{yearly_cost:.2f} annually! 💸"
         ]
 
     def calculate_environmental_impact(self, recycled_cups: int) -> Dict:
@@ -66,7 +66,7 @@ class FeedbackGenerator:
         
         # Daily usage-based suggestion
         yearly_cups = daily_usage * 365
-        yearly_cost = yearly_cups * 0.50  # Assuming $0.50 per paper cup
+        yearly_cost = yearly_cups * 0.50  # Assuming ₹0.50 per paper cup
         daily = random.choice(self.daily_usage_messages).format(
             daily=daily_usage,
             yearly=yearly_cups,

@@ -4,8 +4,18 @@ const cors = require('cors');
 const connectDB = require('./config/mongodb');
 const routes = require('./router');
 const passport = require('./config/passport');
+const http = require('http');
+const socketIO = require('socket.io');
 
-const app = express();
+const app = express(); 
+const server = http.createServer(app);
+const io = socketIO(server, {
+  cors: {
+    origin: ["http://localhost:5173", "http://127.0.0.1:5173"], // Add your frontend URLs
+    methods: ["GET", "POST"],
+    credentials: true
+  }
+}); 
 
 // Connect to MongoDB
 connectDB();
@@ -36,6 +46,19 @@ app.get('/health', (req, res) => {
   res.status(200).json({ status: 'OK' });
 });
 
+// Socket.IO connection handling
+io.on('connection', (socket) => {
+  console.log('User connected');
+
+  socket.on('joinLeaderboard', () => {
+    socket.join('leaderboard');
+  });
+
+  socket.on('disconnect', () => {
+    console.log('User disconnected');
+  });
+});
+
 // Error handler
 app.use((err, req, res, next) => {
   console.error(err.stack);
@@ -44,8 +67,14 @@ app.use((err, req, res, next) => {
 
 // Start server
 const PORT = process.env.PORT || 3000;
-app.listen(PORT, () => {
-  console.log(`Server is running on port ${PORT}`);
+connectDB().then(() => {
+  server.listen(PORT, '0.0.0.0', () => {
+    console.log(`Server is running on http://localhost:${PORT}`);
+    console.log('Press CTRL+C to stop the server');
+  });
+}).catch(err => {
+  console.error('Failed to connect to MongoDB:', err);
+  process.exit(1);
 });
 
 module.exports = app;
