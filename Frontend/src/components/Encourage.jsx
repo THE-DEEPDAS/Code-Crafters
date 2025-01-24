@@ -15,7 +15,7 @@ import { Line, Bar, Doughnut } from 'react-chartjs-2';
 import axios from 'axios';
 import { motion } from 'framer-motion';
 import html2canvas from 'html2canvas';
-import { QRCodeSVG } from 'qrcode.react';  // Change this line
+import { QRCodeSVG } from 'qrcode.react';
 import BaseLayout from '../Layouts/BaseLayout';
 import { io } from 'socket.io-client';
 import { useNavigate } from 'react-router-dom';
@@ -30,7 +30,7 @@ ChartJS.register(
   Title,
   Tooltip,
   Legend,
-  ArcElement  // Required for Doughnut chart
+  ArcElement
 );
 
 const Encourage = () => {
@@ -144,8 +144,8 @@ const Encourage = () => {
         setAchievements(achievementsResponse.data);
         setStats(calculateStats(userResponse.data.recycledCups));
       } catch (error) {
-        console.error('Error fetching data:', error);
-        setError(error.message);
+        console.error('Error fetching data:', error.response || error);
+        setError(error.response?.data?.message || 'An unexpected error occurred.');
       } finally {
         setLoading(false);
       }
@@ -156,7 +156,12 @@ const Encourage = () => {
 
   useEffect(() => {
     // Initialize socket connection
-    const newSocket = io('http://localhost:3000');
+    const newSocket = io('http://localhost:3000', {
+      withCredentials: true,
+      extraHeaders: {
+        "my-custom-header": "abcd"
+      }
+    });
     setSocket(newSocket);
 
     // Join leaderboard room
@@ -275,169 +280,168 @@ const Encourage = () => {
 
   return (
     <BaseLayout>
-    
-    <div className="min-h-screen bg-gradient-to-br from-green-50 to-teal-50 p-6">
-      <div className="max-w-7xl mx-auto">
-        {/* Motivational Quote */}
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          className="text-center mb-12"
-        >
-          <h1 className="text-4xl font-bold text-green-800 mb-4">
-            Your Green Journey
-          </h1>
-          <p className="text-xl text-green-600 italic">
-            {quotes[Math.floor(Math.random() * quotes.length)]}
-          </p>
-        </motion.div>
+      <div className="min-h-screen bg-gradient-to-br from-green-50 to-teal-50 p-6">
+        <div className="max-w-7xl mx-auto">
+          {/* Motivational Quote */}
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            className="text-center mb-12"
+          >
+            <h1 className="text-4xl font-bold text-green-800 mb-4">
+              Your Green Journey
+            </h1>
+            <p className="text-xl text-green-600 italic">
+              {quotes[Math.floor(Math.random() * quotes.length)]}
+            </p>
+          </motion.div>
 
-        {/* Progress to Next Milestone */}
-        <motion.div 
-          whileHover={{ scale: 1.02 }}
-          className="bg-white rounded-xl shadow-lg p-6 mb-8"
-        >
-          <h3 className="text-xl font-bold text-green-800 mb-4">
-            Road to Next Milestone: {nextMilestone}
-          </h3>
-          <div className="w-full bg-gray-200 rounded-full h-4">
-            <div 
-              className="bg-green-600 rounded-full h-4 transition-all duration-500"
-              style={{ 
-                width: `${(userData?.recycledCups % nextMilestone) / nextMilestone * 100}%`
-              }}
-            />
-          </div>
-          <p className="text-gray-600 mt-2">
-            {userData?.recycledCups || 0} / {nextMilestone} cups
-          </p>
-        </motion.div>
-
-        {/* Stats Grid */}
-        <StatsGrid />
-
-        {/* Environmental Impact */}
-        <motion.div className="bg-white rounded-xl shadow-lg p-6 mb-8">
-          <h3 className="text-xl font-bold text-green-800 mb-4">
-            Your Environmental Impact
-          </h3>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            <div>
-              <Doughnut data={environmentalStats} />
+          {/* Progress to Next Milestone */}
+          <motion.div 
+            whileHover={{ scale: 1.02 }}
+            className="bg-white rounded-xl shadow-lg p-6 mb-8"
+          >
+            <h3 className="text-xl font-bold text-green-800 mb-4">
+              Road to Next Milestone: {nextMilestone}
+            </h3>
+            <div className="w-full bg-gray-200 rounded-full h-4">
+              <div 
+                className="bg-green-600 rounded-full h-4 transition-all duration-500"
+                style={{ 
+                  width: `${(userData?.recycledCups % nextMilestone) / nextMilestone * 100}%`
+                }}
+              />
             </div>
-            <div className="flex flex-col justify-center">
-              <div className="mb-4">
-                <p className="text-lg font-semibold">Trees Spared</p>
-                <p className="text-3xl font-bold text-green-600">{stats.treesSpared}</p>
-              </div>
-              <div className="mb-4">
-                <p className="text-lg font-semibold">Water Saved</p>
-                <p className="text-3xl font-bold text-blue-600">{stats.waterSaved}L</p>
-              </div>
+            <p className="text-gray-600 mt-2">
+              {userData?.recycledCups || 0} / {nextMilestone} cups
+            </p>
+          </motion.div>
+
+          {/* Stats Grid */}
+          <StatsGrid />
+
+          {/* Environmental Impact */}
+          <motion.div className="bg-white rounded-xl shadow-lg p-6 mb-8">
+            <h3 className="text-xl font-bold text-green-800 mb-4">
+              Your Environmental Impact
+            </h3>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               <div>
-                <p className="text-lg font-semibold">CO2 Reduced</p>
-                <p className="text-3xl font-bold text-teal-600">{stats.co2Reduced}kg</p>
+                <Doughnut data={environmentalStats} />
+              </div>
+              <div className="flex flex-col justify-center">
+                <div className="mb-4">
+                  <p className="text-lg font-semibold">Trees Spared</p>
+                  <p className="text-3xl font-bold text-green-600">{stats.treesSpared}</p>
+                </div>
+                <div className="mb-4">
+                  <p className="text-lg font-semibold">Water Saved</p>
+                  <p className="text-3xl font-bold text-blue-600">{stats.waterSaved}L</p>
+                </div>
+                <div>
+                  <p className="text-lg font-semibold">CO2 Reduced</p>
+                  <p className="text-3xl font-bold text-teal-600">{stats.co2Reduced}kg</p>
+                </div>
               </div>
             </div>
-          </div>
-        </motion.div>
+          </motion.div>
 
-        {/* Charts */}
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-12">
-          {/* Progress Chart */}
-          <div className="bg-white rounded-xl shadow-lg p-6">
-            <h3 className="text-lg font-semibold text-gray-700 mb-4">
-              Your Progress
+          {/* Charts */}
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-12">
+            {/* Progress Chart */}
+            <div className="bg-white rounded-xl shadow-lg p-6">
+              <h3 className="text-lg font-semibold text-gray-700 mb-4">
+                Your Progress
+              </h3>
+              <Line data={progressChart} options={{ responsive: true }} />
+            </div>
+
+            {/* Leaderboard Chart */}
+            <div className="bg-white rounded-xl shadow-lg p-6">
+              <h3 className="text-lg font-semibold text-gray-700 mb-4">
+                Community Leaderboard
+              </h3>
+              <Bar data={leaderboardChart} options={{ responsive: true }} />
+            </div>
+          </div>
+
+          {/* Achievements Gallery with Sharing */}
+          <motion.div className="bg-white rounded-xl shadow-lg p-6">
+            <h3 className="text-xl font-bold text-green-800 mb-4">
+              Your Green Achievements
             </h3>
-            <Line data={progressChart} options={{ responsive: true }} />
-          </div>
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+              {achievements.map((achievement, index) => (
+                <motion.div
+                  key={index}
+                  whileHover={{ scale: 1.05 }}
+                  className="bg-gradient-to-br from-green-100 to-teal-100 rounded-lg p-4"
+                >
+                  <div className="flex justify-between items-start mb-2">
+                    <h4 className="font-semibold text-green-800">
+                      {achievement.milestone} Cups
+                    </h4>
+                    <QRCodeSVG
+                      value={`${window.location.origin}/achievement/${achievement._id}`}
+                      size={64}
+                      className="rounded"
+                    />
+                  </div>
+                  <p className="text-sm text-green-600 mb-3">
+                    Achieved on {new Date(achievement.achievedAt).toLocaleDateString()}
+                  </p>
+                  <div className="flex space-x-2">
+                    <button
+                      onClick={() => {
+                        setSelectedAchievement(achievement);
+                        setShowCertificate(true);
+                      }}
+                      className="flex-1 bg-green-500 text-white px-4 py-2 rounded-lg hover:bg-green-600 transition-colors"
+                    >
+                      View Certificate
+                    </button>
+                    <button
+                      onClick={() => shareAchievement(achievement)}
+                      className="flex-1 bg-blue-500 text-white px-4 py-2 rounded-lg hover:bg-blue-600 transition-colors"
+                    >
+                      Share
+                    </button>
+                  </div>
+                </motion.div>
+              ))}
+            </div>
+          </motion.div>
 
-          {/* Leaderboard Chart */}
-          <div className="bg-white rounded-xl shadow-lg p-6">
-            <h3 className="text-lg font-semibold text-gray-700 mb-4">
-              Community Leaderboard
-            </h3>
-            <Bar data={leaderboardChart} options={{ responsive: true }} />
-          </div>
-        </div>
-
-        {/* Achievements Gallery with Sharing */}
-        <motion.div className="bg-white rounded-xl shadow-lg p-6">
-          <h3 className="text-xl font-bold text-green-800 mb-4">
-            Your Green Achievements
-          </h3>
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-            {achievements.map((achievement, index) => (
+          {/* Certificate Modal */}
+          {showCertificate && selectedAchievement && (
+            <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4">
               <motion.div
-                key={index}
-                whileHover={{ scale: 1.05 }}
-                className="bg-gradient-to-br from-green-100 to-teal-100 rounded-lg p-4"
+                initial={{ scale: 0.9, opacity: 0 }}
+                animate={{ scale: 1, opacity: 1 }}
+                className="bg-white p-8 rounded-lg max-w-2xl w-full"
               >
-                <div className="flex justify-between items-start mb-2">
-                  <h4 className="font-semibold text-green-800">
-                    {achievement.milestone} Cups
-                  </h4>
-                  <QRCodeSVG  // Change QRCode to QRCodeSVG
-                    value={`${window.location.origin}/achievement/${achievement._id}`}
-                    size={64}
-                    className="rounded"
-                  />
+                <div id="certificate" className="certificate-container">
+                  {/* Certificate content will be generated here */}
                 </div>
-                <p className="text-sm text-green-600 mb-3">
-                  Achieved on {new Date(achievement.achievedAt).toLocaleDateString()}
-                </p>
-                <div className="flex space-x-2">
+                <div className="flex justify-end mt-4 space-x-2">
                   <button
-                    onClick={() => {
-                      setSelectedAchievement(achievement);
-                      setShowCertificate(true);
-                    }}
-                    className="flex-1 bg-green-500 text-white px-4 py-2 rounded-lg hover:bg-green-600 transition-colors"
+                    onClick={() => setShowCertificate(false)}
+                    className="bg-gray-500 text-white px-4 py-2 rounded hover:bg-gray-600"
                   >
-                    View Certificate
+                    Close
                   </button>
                   <button
-                    onClick={() => shareAchievement(achievement)}
-                    className="flex-1 bg-blue-500 text-white px-4 py-2 rounded-lg hover:bg-blue-600 transition-colors"
+                    onClick={() => shareAchievement(selectedAchievement)}
+                    className="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600"
                   >
                     Share
                   </button>
                 </div>
               </motion.div>
-            ))}
-          </div>
-        </motion.div>
-
-        {/* Certificate Modal */}
-        {showCertificate && selectedAchievement && (
-          <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4">
-            <motion.div
-              initial={{ scale: 0.9, opacity: 0 }}
-              animate={{ scale: 1, opacity: 1 }}
-              className="bg-white p-8 rounded-lg max-w-2xl w-full"
-            >
-              <div id="certificate" className="certificate-container">
-                {/* Certificate content will be generated here */}
-              </div>
-              <div className="flex justify-end mt-4 space-x-2">
-                <button
-                  onClick={() => setShowCertificate(false)}
-                  className="bg-gray-500 text-white px-4 py-2 rounded hover:bg-gray-600"
-                >
-                  Close
-                </button>
-                <button
-                  onClick={() => shareAchievement(selectedAchievement)}
-                  className="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600"
-                >
-                  Share
-                </button>
-              </div>
-            </motion.div>
-          </div>
-        )}
+            </div>
+          )}
+        </div>
       </div>
-    </div>
     </BaseLayout>
   );
 };

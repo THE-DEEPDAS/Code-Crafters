@@ -153,7 +153,7 @@ router.get("/user/:id", auth, async (req, res) => {
   }
 });
 
-// Get User Data by Username
+// Get User Daa by Username
 router.get("/user/:username", auth, async (req, res) => {
   try {
     console.log(`Fetching user data for username: ${req.params.username}`);
@@ -173,9 +173,9 @@ router.get("/user/:username", auth, async (req, res) => {
 });
 
 // Stats Routes
-router.get("/stats/user/:id", auth, async (req, res) => {
+router.get("/stats/user", auth, async (req, res) => {
   try {
-    const user = await User.findById(req.params.id || req.user.id);
+    const user = await User.findById(req.user.id);
     if (!user) {
       return res.status(404).json({ message: "User not found" });
     }
