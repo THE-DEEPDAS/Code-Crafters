@@ -15,7 +15,7 @@ import { Line, Bar, Doughnut } from 'react-chartjs-2';
 import axios from 'axios';
 import { motion } from 'framer-motion';
 import html2canvas from 'html2canvas';
-import QRCode from 'qrcode.react';
+import { QRCodeSVG } from 'qrcode.react';  // Change this line
 import BaseLayout from '../Layouts/BaseLayout';
 import { io } from 'socket.io-client';
 
@@ -366,7 +366,7 @@ const Encourage = () => {
                   <h4 className="font-semibold text-green-800">
                     {achievement.milestone} Cups
                   </h4>
-                  <QRCode
+                  <QRCodeSVG  // Change QRCode to QRCodeSVG
                     value={`${window.location.origin}/achievement/${achievement._id}`}
                     size={64}
                     className="rounded"
