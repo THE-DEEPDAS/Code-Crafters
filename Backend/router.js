@@ -10,6 +10,16 @@ router.get("/", (req, res) => {
     res.send("Welcome to the API!");
 })
 
+// Route to serve signup form
+router.get("/signup", (req, res) => {
+  res.sendFile(__dirname + '/public/signup.html');
+});
+
+// Route to serve signin form
+router.get("/signin", (req, res) => {
+  res.sendFile(__dirname + '/public/signin.html');
+});
+
 // Signup Route
 router.post("/signup", async (req, res) => {
   try {
@@ -44,9 +54,9 @@ router.post("/signup", async (req, res) => {
 
     await user.save();
 
-    // Generate JWT token
+    // Generate JWT token with extended expiration time
     const token = jwt.sign({ id: user._id }, process.env.JWT_SECRET, {
-      expiresIn: "1h",
+      expiresIn: "24h", // Extended to 24 hours
     });
 
     res.status(201).json({
@@ -81,9 +91,9 @@ router.post("/signin", async (req, res) => {
       return res.status(400).json({ message: "Invalid credentials" });
     }
 
-    // Generate JWT token
+    // Generate JWT token with extended expiration time
     const token = jwt.sign({ id: user._id }, process.env.JWT_SECRET, {
-      expiresIn: "1h",
+      expiresIn: "24h", // Extended to 24 hours
     });
 
     res.json({
@@ -122,6 +132,41 @@ router.patch("/update-stats", auth, async (req, res) => {
       dailyCupUsage: user.dailyCupUsage,
     });
   } catch (error) {
+    res.status(500).json({ message: "Server error", error: error.message });
+  }
+});
+
+// Get User Data by ID
+router.get("/user/:id", auth, async (req, res) => {
+  try {
+    const user = await User.findById(req.params.id);
+    if (!user) {
+      return res.status(404).json({ message: "User not found" });
+    }
+    res.json({
+      recycledCups: user.recycledCups,
+      dailyCupUsage: user.dailyCupUsage,
+    });
+  } catch (error) {
+    res.status(500).json({ message: "Server error", error: error.message });
+  }
+});
+
+// Get User Data by Username
+router.get("/user/:username", auth, async (req, res) => {
+  try {
+    console.log(`Fetching user data for username: ${req.params.username}`);
+    const user = await User.findOne({ username: req.params.username });
+    if (!user) {
+      console.log("User not found");
+      return res.status(404).json({ message: "User not found" });
+    }
+    res.json({
+      recycledCups: user.recycledCups,
+      dailyCupUsage: user.dailyCupUsage,
+    });
+  } catch (error) {
+    console.error("Error fetching user data:", error);
     res.status(500).json({ message: "Server error", error: error.message });
   }
 });

@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cup Karma Feedback</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f0f8ff;
+            color: #333;
+            text-align: center;
+            padding: 20px;
+        }
+        .feedback-container {
+            background-color: #fff;
+            border-radius: 10px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+            padding: 20px;
+            margin: 20px auto;
+            max-width: 600px;
+        }
+        .feedback {
+            font-size: 1.2em;
+            margin: 10px 0;
+        }
+        .stats {
+            font-size: 0.9em;
+            color: #555;
+        }
+    </style>
+</head>
+<body>
+    <h1>Cup Karma Feedback</h1>
+    <div class="feedback-container">
+        <div id="generic-feedback" class="feedback"></div>
+        <div id="usage-feedback" class="feedback"></div>
+        <div id="daily-feedback" class="feedback"></div>
+        <div id="stats" class="stats"></div>
+    </div>
+    <script>
+        document.addEventListener('DOMContentLoaded', async () => {
+            try {
+                const response = await fetch('/api/feedback', {
+                    headers: {
+                        'Authorization': `Bearer ${localStorage.getItem('token')}`
+                    }
+                });
+                const data = await response.json();
+                document.getElementById('generic-feedback').innerText = data.feedback[0];
+                document.getElementById('usage-feedback').innerText = data.feedback[1];
+                document.getElementById('daily-feedback').innerText = data.feedback[2];
+                document.getElementById('stats').innerText = `Recycled Cups: ${data.stats.recycled_cups}, Daily Usage: ${data.stats.daily_usage}, Trees Saved: ${data.stats.trees_saved.toFixed(2)}, Water Saved: ${data.stats.water_saved.toFixed(2)} gallons, Emissions Saved: ${data.stats.emissions_saved.toFixed(2)} miles, Yearly Cups: ${data.stats.yearly_cups}, Yearly Cost: $${data.stats.yearly_cost.toFixed(2)}`;
+            } catch (error) {
+                console.error('Error fetching feedback:', error);
+            }
+        });
+    </script>
+</body>
+</html>

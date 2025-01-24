@@ -10,14 +10,26 @@ const app = express();
 // Connect to MongoDB
 connectDB();
 
-// Middleware
+// Middleware 
 app.use(cors());
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use(passport.initialize());
 
+// Middleware to serve static files
+app.use(express.static('public'));
+
 // Routes
 app.use('/api', routes);
+
+// Routes for serving signup and signin forms
+app.get('/signup', (req, res) => {
+  res.sendFile(__dirname + '/public/signup.html');
+});
+
+app.get('/signin', (req, res) => {
+  res.sendFile(__dirname + '/public/signin.html');
+});
 
 // Health check route
 app.get('/health', (req, res) => {
