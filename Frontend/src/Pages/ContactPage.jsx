@@ -9,10 +9,10 @@ import {
 	Palette,
 	Database,
 } from "lucide-react";
-import TeamMemberCard from "./TeamMemberCard";
-import deep from "../../public/deep.jpg";
-import kuruv from "../../public/kuruv.jpg";
-import hitarth from "../../public/hitarth.jpg";
+import TeamMemberCard from "../components/TeamMemberCard";
+import deep from "../assets/deep.jpg";
+import kuruv from "../assets/kuruv.jpg";
+import hitarth from "../assets/hitarth.jpg";
 import BaseLayout from "../Layouts/BaseLayout";
 
 const ContactPage = () => {

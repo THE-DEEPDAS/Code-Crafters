@@ -1,12 +1,12 @@
 import { Route, Routes } from "react-router-dom";
 import Home from "./Pages/Home";
-import Insights from './components/insights';
-import ContactPage from './components/ContactPage';
+import Insights from "./Pages/insights";
+import ContactPage from "./Pages/ContactPage";
 import Signin from "./Pages/signin";
 
 import Signup from "./Pages/signup";
 export default function App() {
-  return (
+	return (
 		<div>
 			<Routes>
 				<Route path='/' element={<Home />} />
