@@ -30,13 +30,12 @@ const Navbar = () => {
             </Link>
           </li>
           <li>
-            <a
-              href="http://localhost:3000/encourage"
-              rel="noopener noreferrer"
+            <Link
+              to="/encourage"
               className="text-white hover:text-blue-200 font-semibold"
             >
               Encourage
-            </a>
+            </Link>
           </li>
           <li>
             <a

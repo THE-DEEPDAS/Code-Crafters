@@ -218,6 +218,9 @@ export default function Home() {
 
         {/* Text Content */}
         <div className="relative z-10 text-center max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+    <BaseLayout overrides={{ div: {backgroundOpacity: 0} }}>
+      <section className="flex flex-row bg-amber-100">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-32 pb-48">
           <h1 className="text-5xl md:text-7xl font-bold text-blue-400 mb-6">
             BE THE
             <span className="bg-gradient-to-r from-emerald-400 to-green-500 bg-clip-text text-transparent">
