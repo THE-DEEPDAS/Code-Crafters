@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState } from "react";
 import {
   Chart as ChartJS,
   CategoryScale,
@@ -28,53 +28,53 @@ import {
 
 // Register ChartJS components
 ChartJS.register(
-  CategoryScale,
-  LinearScale,
-  PointElement,
-  LineElement,
-  BarElement,
-  Title,
-  Tooltip,
-  Legend,
-  ArcElement
+	CategoryScale,
+	LinearScale,
+	PointElement,
+	LineElement,
+	BarElement,
+	Title,
+	Tooltip,
+	Legend,
+	ArcElement
 );
 
 const Encourage = () => {
-  const navigate = useNavigate();
-  
-  useEffect(() => {
-    const token = localStorage.getItem('token');
-    if (!token) {
-      navigate('/signin');
-      return;
-    }
-  }, [navigate]);
+	const navigate = useNavigate();
 
-  const [userData, setUserData] = useState(null);
-  const [leaderboard, setLeaderboard] = useState([]);
-  const [achievements, setAchievements] = useState([]);
-  const [quotes] = useState([
-    "Every cup recycled is a step towards a greener future! 🌱",
-    "You're making waves in environmental conservation! 🌊",
-    "Small actions create big impacts! Keep going! ⭐",
-    "You're part of the solution, not the pollution! 🌍",
-    "Your eco-friendly choices inspire others! 🌿"
-  ]);
-  const [selectedAchievement, setSelectedAchievement] = useState(null);
-  const [showCertificate, setShowCertificate] = useState(false);
-  const [stats, setStats] = useState({
-    treesSpared: 0,
-    waterSaved: 0,
-    co2Reduced: 0
-  });
-  const [socket, setSocket] = useState(null);
-  const [error, setError] = useState(null);
-  const [loading, setLoading] = useState(true);
-  const [showMetricsForm, setShowMetricsForm] = useState(false);
-  const [newMetrics, setNewMetrics] = useState({
-    recycledCups: '',
-    dailyCupUsage: ''
-  });
+	useEffect(() => {
+		const token = localStorage.getItem("token");
+		if (!token) {
+			navigate("/signin");
+			return;
+		}
+	}, [navigate]);
+
+	const [userData, setUserData] = useState(null);
+	const [leaderboard, setLeaderboard] = useState([]);
+	const [achievements, setAchievements] = useState([]);
+	const [quotes] = useState([
+		"Every cup recycled is a step towards a greener future! 🌱",
+		"You're making waves in environmental conservation! 🌊",
+		"Small actions create big impacts! Keep going! ⭐",
+		"You're part of the solution, not the pollution! 🌍",
+		"Your eco-friendly choices inspire others! 🌿",
+	]);
+	const [selectedAchievement, setSelectedAchievement] = useState(null);
+	const [showCertificate, setShowCertificate] = useState(false);
+	const [stats, setStats] = useState({
+		treesSpared: 0,
+		waterSaved: 0,
+		co2Reduced: 0,
+	});
+	const [socket, setSocket] = useState(null);
+	const [error, setError] = useState(null);
+	const [loading, setLoading] = useState(true);
+	const [showMetricsForm, setShowMetricsForm] = useState(false);
+	const [newMetrics, setNewMetrics] = useState({
+		recycledCups: "",
+		dailyCupUsage: "",
+	});
 
   const milestones = [100, 500, 1000, 5000, 10000];
   const nextMilestone = milestones.find(m => m > (userData?.recycledCups || 0)) || 'Max Level!';
@@ -375,21 +375,21 @@ const Encourage = () => {
       }
     };
 
-    fetchData();
-  }, []);
+		fetchData();
+	}, []);
 
-  useEffect(() => {
-    // Initialize socket connection
-    const newSocket = io('http://localhost:3000', {
-      withCredentials: true,
-      extraHeaders: {
-        "my-custom-header": "abcd"
-      }
-    });
-    setSocket(newSocket);
+	useEffect(() => {
+		// Initialize socket connection
+		const newSocket = io("http://localhost:3000", {
+			withCredentials: true,
+			extraHeaders: {
+				"my-custom-header": "abcd",
+			},
+		});
+		setSocket(newSocket);
 
-    // Join leaderboard room
-    newSocket.emit('joinLeaderboard');
+		// Join leaderboard room
+		newSocket.emit("joinLeaderboard");
 
     // Listen for leaderboard updates
     newSocket.on('leaderboardUpdate', (updatedLeaderboard) => {
@@ -401,8 +401,8 @@ const Encourage = () => {
       refreshData();
     });
 
-    return () => newSocket.disconnect();
-  }, []);
+		return () => newSocket.disconnect();
+	}, []);
 
   // Ensure that graph data relies on the latest recycledCups from the userData state
   useEffect(() => {
@@ -419,46 +419,46 @@ const Encourage = () => {
     }
   }, [userData]);
 
-  const StatsGrid = () => (
-    <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-12">
-      {/* Total Cups Recycled */}
-      <motion.div
-        whileHover={{ scale: 1.05 }}
-        className="bg-white rounded-xl shadow-lg p-6"
-      >
-        <h3 className="text-lg font-semibold text-gray-700 mb-2">
-          Total Cups Recycled
-        </h3>
-        <p className="text-3xl font-bold text-green-600">
-          {userData?.recycledCups || 0}
-        </p>
-      </motion.div>
+	const StatsGrid = () => (
+		<div className='grid grid-cols-1 md:grid-cols-4 gap-6 mb-12'>
+			{/* Total Cups Recycled */}
+			<motion.div
+				whileHover={{ scale: 1.05 }}
+				className='bg-white rounded-xl shadow-lg p-6'
+			>
+				<h3 className='text-lg font-semibold text-gray-700 mb-2'>
+					Total Cups Recycled
+				</h3>
+				<p className='text-3xl font-bold text-green-600'>
+					{userData?.recycledCups || 0}
+				</p>
+			</motion.div>
 
-      {/* Environmental Impact */}
-      <motion.div
-        whileHover={{ scale: 1.05 }}
-        className="bg-white rounded-xl shadow-lg p-6"
-      >
-        <h3 className="text-lg font-semibold text-gray-700 mb-2">
-          Trees Saved
-        </h3>
-        <p className="text-3xl font-bold text-green-600">
-          {((userData?.recycledCups || 0) * 0.0005).toFixed(2)}
-        </p>
-      </motion.div>
+			{/* Environmental Impact */}
+			<motion.div
+				whileHover={{ scale: 1.05 }}
+				className='bg-white rounded-xl shadow-lg p-6'
+			>
+				<h3 className='text-lg font-semibold text-gray-700 mb-2'>
+					Trees Saved
+				</h3>
+				<p className='text-3xl font-bold text-green-600'>
+					{((userData?.recycledCups || 0) * 0.0005).toFixed(2)}
+				</p>
+			</motion.div>
 
-      {/* Achievements */}
-      <motion.div
-        whileHover={{ scale: 1.05 }}
-        className="bg-white rounded-xl shadow-lg p-6"
-      >
-        <h3 className="text-lg font-semibold text-gray-700 mb-2">
-          Achievements
-        </h3>
-        <p className="text-3xl font-bold text-green-600">
-          {achievements.length}
-        </p>
-      </motion.div>
+			{/* Achievements */}
+			<motion.div
+				whileHover={{ scale: 1.05 }}
+				className='bg-white rounded-xl shadow-lg p-6'
+			>
+				<h3 className='text-lg font-semibold text-gray-700 mb-2'>
+					Achievements
+				</h3>
+				<p className='text-3xl font-bold text-green-600'>
+					{achievements.length}
+				</p>
+			</motion.div>
 
       {/* Current Streak */}
       <motion.div
@@ -609,75 +609,85 @@ const ChartSection = () => (
     </div>
   );
 
-  if (loading) {
-    return (
-      <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-green-50 to-teal-50">
-        <div className="text-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-green-500 mx-auto"></div>
-          <p className="mt-4 text-gray-600">Loading your green journey...</p>
-        </div>
-      </div>
-    );
-  }
+	if (loading) {
+		return (
+			<BaseLayout>
+				<div className='min-h-screen flex items-center justify-center bg-gradient-to-br from-green-50 to-teal-50'>
+					<div className='text-center'>
+						<div className='animate-spin rounded-full h-12 w-12 border-b-2 border-green-500 mx-auto'></div>
+						<p className='mt-4 text-gray-600'>Loading your green journey...</p>
+					</div>
+				</div>
+			</BaseLayout>
+		);
+	}
 
-  if (error) {
-    return (
-      <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-green-50 to-teal-50">
-        <div className="text-center p-8 bg-white rounded-lg shadow-lg">
-          <h2 className="text-2xl font-bold text-red-600 mb-4">Oops! Something went wrong</h2>
-          <p className="text-gray-600 mb-4">{error}</p>
-          <button 
-            onClick={() => window.location.reload()}
-            className="bg-green-500 text-white px-4 py-2 rounded hover:bg-green-600"
-          >
-            Try Again
-          </button>
-        </div>
-      </div>
-    );
-  }
+	if (error) {
+		return (
+			<BaseLayout>
+				<div className='min-h-screen flex items-center justify-center bg-gradient-to-br from-green-50 to-teal-50'>
+					<div className='text-center p-8 bg-white rounded-lg shadow-lg'>
+						<h2 className='text-2xl font-bold text-red-600 mb-4'>
+							Oops! Something went wrong
+						</h2>
+						<p className='text-gray-600 mb-4'>{error}</p>
+						<button
+							onClick={() => window.location.reload()}
+							className='bg-green-500 text-white px-4 py-2 rounded hover:bg-green-600'
+						>
+							Try Again
+						</button>
+					</div>
+				</div>
+			</BaseLayout>
+		);
+	}
 
-  return (
-    <BaseLayout>
-      <div className="min-h-screen bg-gradient-to-br from-green-50 to-teal-50 p-6">
-        <div className="max-w-7xl mx-auto">
-          {/* Motivational Quote */}
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            className="text-center mb-12"
-          >
-            <h1 className="text-4xl font-bold text-green-800 mb-4">
-              Your Green Journey
-            </h1>
-            <p className="text-xl text-green-600 italic">
-              {userData?.username}, {quotes[Math.floor(Math.random() * quotes.length)]}
-            </p>
-          </motion.div>
+	return (
+		<BaseLayout>
+			<div className='min-h-screen bg-gradient-to-br from-green-50 to-teal-50 p-6'>
+				<div className='max-w-7xl mx-auto'>
+					{/* Motivational Quote */}
+					<motion.div
+						initial={{ opacity: 0, y: 20 }}
+						animate={{ opacity: 1, y: 0 }}
+						className='text-center mb-12'
+					>
+						<h1 className='text-4xl font-bold text-green-800 mb-4'>
+							Your Green Journey
+						</h1>
+						<p className='text-xl text-green-600 italic'>
+							{userData?.username},{" "}
+							{quotes[Math.floor(Math.random() * quotes.length)]}
+						</p>
+					</motion.div>
 
-          {/* Progress to Next Milestone */}
-          <motion.div 
-            whileHover={{ scale: 1.02 }}
-            className="bg-white rounded-xl shadow-lg p-6 mb-8"
-          >
-            <h3 className="text-xl font-bold text-green-800 mb-4">
-              Road to Next Milestone: {nextMilestone}
-            </h3>
-            <div className="w-full bg-gray-200 rounded-full h-4">
-              <div 
-                className="bg-green-600 rounded-full h-4 transition-all duration-500"
-                style={{ 
-                  width: `${(userData?.recycledCups % nextMilestone) / nextMilestone * 100}%`
-                }}
-              />
-            </div>
-            <p className="text-gray-600 mt-2">
-              {userData?.recycledCups || 0} / {nextMilestone} cups
-            </p>
-          </motion.div>
+					{/* Progress to Next Milestone */}
+					<motion.div
+						whileHover={{ scale: 1.02 }}
+						className='bg-white rounded-xl shadow-lg p-6 mb-8'
+					>
+						<h3 className='text-xl font-bold text-green-800 mb-4'>
+							Road to Next Milestone: {nextMilestone}
+						</h3>
+						<div className='w-full bg-gray-200 rounded-full h-4'>
+							<div
+								className='bg-green-600 rounded-full h-4 transition-all duration-500'
+								style={{
+									width: `${
+										((userData?.recycledCups % nextMilestone) / nextMilestone) *
+										100
+									}%`,
+								}}
+							/>
+						</div>
+						<p className='text-gray-600 mt-2'>
+							{userData?.recycledCups || 0} / {nextMilestone} cups
+						</p>
+					</motion.div>
 
-          {/* Stats Grid */}
-          <StatsGrid />
+					{/* Stats Grid */}
+					<StatsGrid />
 
           {/* Environmental Impact */}
           <motion.div className="bg-white rounded-xl shadow-lg p-6 mb-8">

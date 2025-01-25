@@ -1,7 +1,17 @@
 import BaseLayout from "../Layouts/BaseLayout"
 import { Coffee, Trash, ChevronLeft, ChevronRight, Cloud } from "lucide-react"
 import { useEffect, useState, useRef } from "react"
-
+import nature1 from "../assets/nature1.avif";
+import nature2 from "../assets/nature2.webp";
+import nature3 from "../assets/nature3.jpg";
+import nature4 from "../assets/nature4.jpg";
+import nature5 from "../assets/nature5.jpg";
+import nature6 from "../assets/nature6.jpg";
+import nature7 from "../assets/nature7.jpeg";
+import nature8 from "../assets/nature8.jpg";
+import nature9 from "../assets/nature9.avif";
+import nature10 from "../assets/nature10.jpg"
+import nature11 from "../assets/nature11.jpg"
 export default function Home() {
   const [cupsCount, setCupsCount] = useState(0)
   const [treesCount, setTreesCount] = useState(0)
@@ -14,13 +24,27 @@ export default function Home() {
   const [showCongrats, setShowCongrats] = useState(false)
   const [pledgeStartTime, setPledgeStartTime] = useState(null)
   const [remainingTime, setRemainingTime] = useState(30)
-  const [isPledgeSectionVisible, setIsPledgeSectionVisible] = useState(false) // Update 1
+  const [isPledgeSectionVisible, setIsPledgeSectionVisible] = useState(false) 
+  const [currentSlide, setCurrentSlide] = useState(0)
 
   const cupsRef = useRef(null)
   const treesRef = useRef(null)
   const carcinogenRef = useRef(null)
   const pledgeRef = useRef(null)
   const timerRef = useRef(null)
+
+  const slides = [
+    nature1, nature2,nature10, nature4, 
+    nature5, nature3,nature11, nature7, nature8, nature9
+  ];
+  
+  useEffect(() => {
+    const intervalId = setInterval(() => {
+      setCurrentSlide((prev) => (prev + 1) % slides.length)
+    }, 3000)
+
+    return () => clearInterval(intervalId)
+  }, [])
 
   useEffect(() => {
     const observerCallback = (entries) => {
@@ -200,8 +224,22 @@ export default function Home() {
 
   return (
     <BaseLayout>
-      <section className="flex flex-row">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-32 pb-48">
+      <section className="relative h-screen flex items-center justify-center overflow-hidden bg-white">
+        <div className="absolute inset-0">
+          <div className="absolute inset-0 overflow-hidden opacity-70 bg-[rgba(0,0,0,0.5)]">
+            {slides.map((slide, index) => (
+              <div 
+                key={slide}
+                className={`absolute inset-0 bg-cover bg-center transition-opacity duration-1000 
+                  ${index === currentSlide ? 'opacity-100' : 'opacity-0'}`}
+                style={{backgroundImage: `url('${slide}')`}}
+              />
+            ))}
+          </div>
+        </div>
+
+        {/* Rest of the section content remains the same */}
+        <div className="relative z-10 text-center max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <h1 className="text-5xl md:text-7xl font-bold text-blue-400 mb-6">
             BE THE
             <span className="bg-gradient-to-r from-emerald-400 to-green-500 bg-clip-text text-transparent">
@@ -209,12 +247,15 @@ export default function Home() {
               CHANGE!
             </span>
           </h1>
-          <h1 className="text-3xl/10 text-black-400 max-w-2xl mb-8 py-4 font-bold">
+          <h1 className="text-3xl/10 text-white max-w-2xl mb-8 py-4 font-bold">
             Building a sustainable future through innovative solutions and responsible development. Join us in creating
             a better world for generations to come.
           </h1>
         </div>
+
+        <div className="absolute inset-0 bg-black opacity-30"></div>
       </section>
+
       <section className="py-24 backdrop-blur-sm bg-[#00cc8c]">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <h2 className="text-4xl font-bold text-center text-white mb-16">The Environmental Impact</h2>
@@ -331,7 +372,7 @@ export default function Home() {
       </section>
 
       {/* Scrollable Facts Section */}
-      <section className="py-24 ">
+      <section className="py-24 bg-[#f9fafb] ">
         <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 relative">
           {/* Navigation Dots */}
           <div className="absolute right-0 top-1/2 -translate-y-1/2 flex flex-col gap-4">
@@ -391,12 +432,12 @@ export default function Home() {
           >
             Take Pledge
           </button>
-          {pledgeMessage && <div className="mt-4 text-lg text-black font-bold">
+          {pledgeMessage && <div className="mt-4 text-2xl text-black">
             <p>{pledgeMessage}</p>
             <p>Stay on this section for 30 seconds to confirm your commitment.</p>
             </div>}
           {showCongrats && (
-            <p className="mt-4 text-2xl font-bold text-emerald-600">
+            <p className="mt-4 text-2xl font-bold text-black">
               Congratulations, you have successfully taken the pledge!
             </p>
           )}

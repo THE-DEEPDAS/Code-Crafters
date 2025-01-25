@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import axios from "axios";
+import api from "../utils/axios";
 import BaseLayout from "../Layouts/BaseLayout";
 
 export default function SignUp() {
@@ -30,7 +30,7 @@ export default function SignUp() {
         setError("");
         
         try {
-            const response = await axios.post("http://localhost:3000/api/signup", formData);
+            const response = await api.post("/signup", formData);
             const { token, user } = response.data;
             
             // Store token and user data
