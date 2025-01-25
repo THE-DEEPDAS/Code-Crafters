@@ -9,117 +9,120 @@ import {
   Title,
   Tooltip,
   Legend,
-  ArcElement
-} from 'chart.js';
-import { Line, Bar, Doughnut } from 'react-chartjs-2';
-import axios from 'axios';
-import { motion } from 'framer-motion';
-import html2canvas from 'html2canvas';
-import { QRCodeSVG } from 'qrcode.react';
-import BaseLayout from '../Layouts/BaseLayout';
-import { io } from 'socket.io-client';
-import { useNavigate } from 'react-router-dom';
-import { 
-  createEnvironmentalStatsConfig, 
+  ArcElement,
+} from "chart.js";
+import { Line, Bar, Doughnut } from "react-chartjs-2";
+import axios from "axios";
+import { motion } from "framer-motion";
+import html2canvas from "html2canvas";
+import { QRCodeSVG } from "qrcode.react";
+import BaseLayout from "../Layouts/BaseLayout";
+import { io } from "socket.io-client";
+import { useNavigate } from "react-router-dom";
+import {
+  createEnvironmentalStatsConfig,
   createChemicalImpactConfig,
   createProgressChartConfig,
-  createLeaderboardChartConfig 
-} from '../utils/chartConfigs';
+  createLeaderboardChartConfig,
+} from "../utils/chartConfigs";
 
 // Register ChartJS components
 ChartJS.register(
-	CategoryScale,
-	LinearScale,
-	PointElement,
-	LineElement,
-	BarElement,
-	Title,
-	Tooltip,
-	Legend,
-	ArcElement
+  CategoryScale,
+  LinearScale,
+  PointElement,
+  LineElement,
+  BarElement,
+  Title,
+  Tooltip,
+  Legend,
+  ArcElement
 );
 
 const Encourage = () => {
-	const navigate = useNavigate();
+  const navigate = useNavigate();
 
-	useEffect(() => {
-		const token = localStorage.getItem("token");
-		if (!token) {
-			navigate("/signin");
-			return;
-		}
-	}, [navigate]);
+  useEffect(() => {
+    const token = localStorage.getItem("token");
+    if (!token) {
+      navigate("/signin");
+      return;
+    }
+  }, [navigate]);
 
-	const [userData, setUserData] = useState(null);
-	const [leaderboard, setLeaderboard] = useState([]);
-	const [achievements, setAchievements] = useState([]);
-	const [quotes] = useState([
-		"Every cup recycled is a step towards a greener future! 🌱",
-		"You're making waves in environmental conservation! 🌊",
-		"Small actions create big impacts! Keep going! ⭐",
-		"You're part of the solution, not the pollution! 🌍",
-		"Your eco-friendly choices inspire others! 🌿",
-	]);
-	const [selectedAchievement, setSelectedAchievement] = useState(null);
-	const [showCertificate, setShowCertificate] = useState(false);
-	const [stats, setStats] = useState({
-		treesSpared: 0,
-		waterSaved: 0,
-		co2Reduced: 0,
-	});
-	const [socket, setSocket] = useState(null);
-	const [error, setError] = useState(null);
-	const [loading, setLoading] = useState(true);
-	const [showMetricsForm, setShowMetricsForm] = useState(false);
-	const [newMetrics, setNewMetrics] = useState({
-		recycledCups: "",
-		dailyCupUsage: "",
-	});
+  const [userData, setUserData] = useState(null);
+  const [leaderboard, setLeaderboard] = useState([]);
+  const [achievements, setAchievements] = useState([]);
+  const [quotes] = useState([
+    "Every cup recycled is a step towards a greener future! 🌱",
+    "You're making waves in environmental conservation! 🌊",
+    "Small actions create big impacts! Keep going! ⭐",
+    "You're part of the solution, not the pollution! 🌍",
+    "Your eco-friendly choices inspire others! 🌿",
+  ]);
+  const [selectedAchievement, setSelectedAchievement] = useState(null);
+  const [showCertificate, setShowCertificate] = useState(false);
+  const [stats, setStats] = useState({
+    treesSpared: 0,
+    waterSaved: 0,
+    co2Reduced: 0,
+  });
+  const [socket, setSocket] = useState(null);
+  const [error, setError] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const [showMetricsForm, setShowMetricsForm] = useState(false);
+  const [newMetrics, setNewMetrics] = useState({
+    recycledCups: "",
+    dailyCupUsage: "",
+  });
 
   const milestones = [100, 500, 1000, 5000, 10000];
-  const nextMilestone = milestones.find(m => m > (userData?.recycledCups || 0)) || 'Max Level!';
+  const nextMilestone =
+    milestones.find((m) => m > (userData?.recycledCups || 0)) || "Max Level!";
 
   const [chemicalImpact, setChemicalImpact] = useState({
     bpa: 0,
     phthalates: 0,
     dioxins: 0,
     styrene: 0,
-    polyethylene: 0
+    polyethylene: 0,
   });
 
   const environmentalStats = {
     labels: [
-      'Trees Spared', 
-      'Water Saved (L)', 
-      'CO2 Reduced (kg)',
-      'BPA Avoided (mg)',
-      'Phthalates Avoided (mg)',
-      'Dioxins Avoided (µg)',
-      'Styrene Avoided (mg)',
-      'Polyethylene Avoided (g)'
+      "Trees Spared",
+      "Water Saved (L)",
+      "CO2 Reduced (kg)",
+      "BPA Avoided (mg)",
+      "Phthalates Avoided (mg)",
+      "Dioxins Avoided (µg)",
+      "Styrene Avoided (mg)",
+      "Polyethylene Avoided (g)",
     ],
-    datasets: [{
-      data: [
-        stats.treesSpared,
-        stats.waterSaved,
-        stats.co2Reduced,
-        stats.bpa,
-        stats.phthalates,
-        stats.dioxins,
-        stats.styrene,
-        stats.polyethylene
-      ],
-      backgroundColor: [
-        '#4ade80',
-        '#60a5fa',
-        '#34d399',
-        '#f87171',
-        '#c084fc',
-        '#fbbf24',
-        '#f472b6',
-        '#a78bfa'
-      ]
-    }]
+    datasets: [
+      {
+        data: [
+          stats.treesSpared,
+          stats.waterSaved,
+          stats.co2Reduced,
+          stats.bpa,
+          stats.phthalates,
+          stats.dioxins,
+          stats.styrene,
+          stats.polyethylene,
+        ],
+        backgroundColor: [
+          "#4ade80",
+          "#60a5fa",
+          "#34d399",
+          "#f87171",
+          "#c084fc",
+          "#fbbf24",
+          "#f472b6",
+          "#a78bfa",
+        ],
+      },
+    ],
   };
 
   // Enhance the calculateStats function to ensure accurate calculations based on recycledCups
@@ -132,17 +135,18 @@ const Encourage = () => {
       phthalates: (cups * 0.08).toFixed(2), // 15µg phthalates per plastic cup
       dioxins: (cups * 0.002).toFixed(4), // 2ng dioxins per paper cup
       styrene: (cups * 0.15).toFixed(2), // 25µg styrene per plastic cup
-      polyethylene: (cups * 0.35).toFixed(2) // 50mg polyethylene per plastic cup
+      polyethylene: (cups * 0.35).toFixed(2), // 50mg polyethylene per plastic cup
     };
   };
 
   const generateCertificate = async (achievement) => {
     return new Promise((resolve) => {
-      const certificateElement = document.createElement('div');
-      certificateElement.className = 'certificate-container bg-white p-8 rounded-lg border-8 border-green-600 text-center';
-      certificateElement.style.width = '800px';
-      certificateElement.style.height = '600px';
-      
+      const certificateElement = document.createElement("div");
+      certificateElement.className =
+        "certificate-container bg-white p-8 rounded-lg border-8 border-green-600 text-center";
+      certificateElement.style.width = "800px";
+      certificateElement.style.height = "600px";
+
       certificateElement.innerHTML = `
         <div class="certificate-content">
           <h1 class="text-3xl font-bold mb-4">Certificate of Achievement</h1>
@@ -150,20 +154,22 @@ const Encourage = () => {
           <p class="text-xl mb-2">This certifies that</p>
           <h2 class="text-2xl font-bold mb-4">${userData?.username}</h2>
           <p class="text-xl mb-4">has successfully recycled</p>
-          <h3 class="text-4xl font-bold text-green-600 mb-4">${achievement.milestone} Cups</h3>
+          <h3 class="text-4xl font-bold text-green-600 mb-4">${
+            achievement.milestone
+          } Cups</h3>
           <p class="text-lg mb-4">Contributing to a greener planet</p>
           <div class="mt-8">
             <p class="text-md">Awarded on ${new Date().toLocaleDateString()}</p>
-            <p class="text-md">Cup Karma Environmental Initiative</p>
+            <p class="text-md">Eco Brew Environmental Initiative</p>
           </div>
         </div>
       `;
 
       document.body.appendChild(certificateElement);
-      
-      html2canvas(certificateElement).then(canvas => {
+
+      html2canvas(certificateElement).then((canvas) => {
         document.body.removeChild(certificateElement);
-        resolve(canvas.toDataURL('image/png'));
+        resolve(canvas.toDataURL("image/png"));
       });
     });
   };
@@ -171,27 +177,28 @@ const Encourage = () => {
   const shareAchievement = async (achievement) => {
     try {
       await generateCertificate(achievement);
-      window.location.href = 'https://www.exampleShareSite.com';
+      window.location.href = "https://www.exampleShareSite.com";
     } catch (error) {
-      console.error('Error sharing:', error);
+      console.error("Error sharing:", error);
     }
   };
 
   const refreshData = async () => {
-    const token = localStorage.getItem('token');
+    const token = localStorage.getItem("token");
     try {
-      const [userResponse, leaderboardResponse, achievementsResponse] = await Promise.all([
-        axios.get('http://localhost:3000/api/stats/user', { 
-          headers: { Authorization: `Bearer ${token}` }
-        }),
-        axios.get('http://localhost:3000/api/stats/leaderboard', { 
-          headers: { Authorization: `Bearer ${token}` }
-        }),
-        axios.get('http://localhost:3000/api/stats/achievements', { 
-          headers: { Authorization: `Bearer ${token}` }
-        })
-      ]);
-      
+      const [userResponse, leaderboardResponse, achievementsResponse] =
+        await Promise.all([
+          axios.get("http://localhost:3000/api/stats/user", {
+            headers: { Authorization: `Bearer ${token}` },
+          }),
+          axios.get("http://localhost:3000/api/stats/leaderboard", {
+            headers: { Authorization: `Bearer ${token}` },
+          }),
+          axios.get("http://localhost:3000/api/stats/achievements", {
+            headers: { Authorization: `Bearer ${token}` },
+          }),
+        ]);
+
       setUserData(userResponse.data);
       setLeaderboard(leaderboardResponse.data);
       setAchievements(achievementsResponse.data);
@@ -202,11 +209,13 @@ const Encourage = () => {
         phthalates: updatedStats.phthalates,
         dioxins: updatedStats.dioxins,
         styrene: updatedStats.styrene,
-        polyethylene: updatedStats.polyethylene
+        polyethylene: updatedStats.polyethylene,
       });
     } catch (error) {
-      console.error('Error refreshing data:', error);
-      setError(error.response?.data?.message || 'An unexpected error occurred.');
+      console.error("Error refreshing data:", error);
+      setError(
+        error.response?.data?.message || "An unexpected error occurred."
+      );
     }
   };
 
@@ -214,34 +223,34 @@ const Encourage = () => {
   const handleMetricsChange = (e) => {
     const { name, value } = e.target;
     // Remove any non-numeric characters
-    const numericValue = value.replace(/\D/g, '');
-    setNewMetrics(prev => ({
+    const numericValue = value.replace(/\D/g, "");
+    setNewMetrics((prev) => ({
       ...prev,
-      [name]: numericValue
+      [name]: numericValue,
     }));
   };
 
   // Updated metrics change handler with direct achievement checking
   const changeMetrics = async (e) => {
     e.preventDefault();
-    const token = localStorage.getItem('token');
+    const token = localStorage.getItem("token");
     try {
       const updatedCups = parseFloat(newMetrics.recycledCups);
       const dailyUsage = parseFloat(newMetrics.dailyCupUsage) || 0;
 
       if (isNaN(updatedCups) || updatedCups < 0) {
-        alert('Please enter a valid number of cups');
+        alert("Please enter a valid number of cups");
         return;
       }
 
       // Update user stats
       const response = await axios.patch(
-        'http://localhost:3000/api/stats/update-metrics',
+        "http://localhost:3000/api/stats/update-metrics",
         {
           recycledCups: updatedCups,
-          dailyCupUsage: dailyUsage
+          dailyCupUsage: dailyUsage,
         },
-        { headers: { Authorization: `Bearer ${token}` }}
+        { headers: { Authorization: `Bearer ${token}` } }
       );
 
       // Update local state with response data
@@ -253,156 +262,170 @@ const Encourage = () => {
         phthalates: newStats.phthalates,
         dioxins: newStats.dioxins,
         styrene: newStats.styrene,
-        polyethylene: newStats.polyethylene
+        polyethylene: newStats.polyethylene,
       });
 
       // If new achievement was unlocked
       if (response.data.achievement) {
-        const alreadyExists = achievements.some(a => a._id === response.data.achievement._id);
+        const alreadyExists = achievements.some(
+          (a) => a._id === response.data.achievement._id
+        );
         if (!alreadyExists) {
-          setAchievements(prev => [...prev, response.data.achievement]);
+          setAchievements((prev) => [...prev, response.data.achievement]);
         }
       }
 
       // Reset form
-      setNewMetrics({ recycledCups: '', dailyCupUsage: '' });
+      setNewMetrics({ recycledCups: "", dailyCupUsage: "" });
       setShowMetricsForm(false);
 
       // Refresh all data
       await refreshData();
 
       if (socket) {
-        socket.emit('metricsUpdated');
+        socket.emit("metricsUpdated");
       }
 
       // Check and unlock achievements based on the updated cups
       await checkAndUnlockAchievements(response.data.user.recycledCups);
     } catch (error) {
-      console.error('Error updating metrics:', error);
-      setError(error.response?.data?.message || 'An unexpected error occurred while updating metrics.');
+      console.error("Error updating metrics:", error);
+      setError(
+        error.response?.data?.message ||
+          "An unexpected error occurred while updating metrics."
+      );
     }
   };
 
   // Updated achievement checking function
   const checkAndUnlockAchievements = async (currentCups) => {
     if (!currentCups) return;
-    
-    const token = localStorage.getItem('token');
+
+    const token = localStorage.getItem("token");
     try {
       // Get all possible milestones up to current cups
-      const unlockedMilestones = milestones.filter(m => currentCups >= m);
-      
+      const unlockedMilestones = milestones.filter((m) => currentCups >= m);
+
       // Get existing achievements
-      const response = await axios.get('http://localhost:3000/api/stats/achievements', {
-        headers: { Authorization: `Bearer ${token}` }
-      });
+      const response = await axios.get(
+        "http://localhost:3000/api/stats/achievements",
+        {
+          headers: { Authorization: `Bearer ${token}` },
+        }
+      );
       const existingAchievements = response.data;
-      const existingMilestones = existingAchievements.map(a => a.milestone);
-      
+      const existingMilestones = existingAchievements.map((a) => a.milestone);
+
       // Find new milestones
-      const newMilestones = unlockedMilestones.filter(m => !existingMilestones.includes(m));
-      
+      const newMilestones = unlockedMilestones.filter(
+        (m) => !existingMilestones.includes(m)
+      );
+
       // Create new achievements
       const newAchievements = [];
       for (const milestone of newMilestones) {
         try {
           const achievementResponse = await axios.post(
-            'http://localhost:3000/api/stats/achievements',
+            "http://localhost:3000/api/stats/achievements",
             { milestone },
             {
               headers: { Authorization: `Bearer ${token}` },
-              withCredentials: true
+              withCredentials: true,
             }
           );
-          
+
           if (achievementResponse.data) {
             newAchievements.push(achievementResponse.data);
           }
         } catch (error) {
-          console.error('Error creating achievement:', error);
+          console.error("Error creating achievement:", error);
         }
       }
-      
+
       if (newAchievements.length > 0) {
         // Update local achievements state with new achievements
-        setAchievements(prev => [...prev, ...newAchievements]);
-        
+        setAchievements((prev) => [...prev, ...newAchievements]);
+
         // Show the highest milestone achievement
-        const highestAchievement = newAchievements.reduce((prev, current) => 
-          (current.milestone > prev.milestone) ? current : prev
+        const highestAchievement = newAchievements.reduce((prev, current) =>
+          current.milestone > prev.milestone ? current : prev
         );
-        
+
         setSelectedAchievement(highestAchievement);
-        
+
         // Alert the user
-        alert(`Congratulations! You've unlocked ${newAchievements.length} new achievement(s)!`);
-        
+        alert(
+          `Congratulations! You've unlocked ${newAchievements.length} new achievement(s)!`
+        );
+
         // Refresh user data to update achievement count
         await refreshData();
       }
     } catch (error) {
-      console.error('Error checking achievements:', error);
+      console.error("Error checking achievements:", error);
     }
   };
 
   useEffect(() => {
     const fetchData = async () => {
       setLoading(true);
-      const token = localStorage.getItem('token');
+      const token = localStorage.getItem("token");
       try {
-        const [userResponse, leaderboardResponse, achievementsResponse] = await Promise.all([
-          axios.get('http://localhost:3000/api/stats/user', { 
-            headers: { Authorization: `Bearer ${token}` }
-          }),
-          axios.get('http://localhost:3000/api/stats/leaderboard', { 
-            headers: { Authorization: `Bearer ${token}` }
-          }),
-          axios.get('http://localhost:3000/api/stats/achievements', { 
-            headers: { Authorization: `Bearer ${token}` }
-          })
-        ]);
-        
+        const [userResponse, leaderboardResponse, achievementsResponse] =
+          await Promise.all([
+            axios.get("http://localhost:3000/api/stats/user", {
+              headers: { Authorization: `Bearer ${token}` },
+            }),
+            axios.get("http://localhost:3000/api/stats/leaderboard", {
+              headers: { Authorization: `Bearer ${token}` },
+            }),
+            axios.get("http://localhost:3000/api/stats/achievements", {
+              headers: { Authorization: `Bearer ${token}` },
+            }),
+          ]);
+
         setUserData(userResponse.data);
         setLeaderboard(leaderboardResponse.data);
         setAchievements(achievementsResponse.data);
         setStats(calculateStats(userResponse.data.recycledCups));
-        
       } catch (error) {
-        console.error('Error fetching data:', error.response || error);
-        setError(error.response?.data?.message || 'An unexpected error occurred.');
+        console.error("Error fetching data:", error.response || error);
+        setError(
+          error.response?.data?.message || "An unexpected error occurred."
+        );
       } finally {
         setLoading(false);
       }
     };
 
-		fetchData();
-	}, []);
+    fetchData();
+  }, []);
 
-	useEffect(() => {
-		// Initialize socket connection
-		const newSocket = io("http://localhost:3000", {
-			withCredentials: true,
-			extraHeaders: {
-				"my-custom-header": "abcd",
-			},
-		});
-		setSocket(newSocket);
+  useEffect(() => {
+    // Initialize socket connection
+    const newSocket = io("http://localhost:3000", {
+      withCredentials: true,
+      extraHeaders: {
+        "my-custom-header": "abcd",
+      },
+    });
+    setSocket(newSocket);
 
-		// Join leaderboard room
-		newSocket.emit("joinLeaderboard");
+    // Join leaderboard room
+    newSocket.emit("joinLeaderboard");
 
     // Listen for leaderboard updates
-    newSocket.on('leaderboardUpdate', (updatedLeaderboard) => {
+    newSocket.on("leaderboardUpdate", (updatedLeaderboard) => {
       setLeaderboard(updatedLeaderboard);
     });
 
     // Listen for metrics updates from other users
-    newSocket.on('metricsUpdated', () => {
+    newSocket.on("metricsUpdated", () => {
       refreshData();
     });
 
-		return () => newSocket.disconnect();
-	}, []);
+    return () => newSocket.disconnect();
+  }, []);
 
   // Ensure that graph data relies on the latest recycledCups from the userData state
   useEffect(() => {
@@ -414,51 +437,51 @@ const Encourage = () => {
         phthalates: updatedStats.phthalates,
         dioxins: updatedStats.dioxins,
         styrene: updatedStats.styrene,
-        polyethylene: updatedStats.polyethylene
+        polyethylene: updatedStats.polyethylene,
       });
     }
   }, [userData]);
 
-	const StatsGrid = () => (
-		<div className='grid grid-cols-1 md:grid-cols-4 gap-6 mb-12'>
-			{/* Total Cups Recycled */}
-			<motion.div
-				whileHover={{ scale: 1.05 }}
-				className='bg-white rounded-xl shadow-lg p-6'
-			>
-				<h3 className='text-lg font-semibold text-gray-700 mb-2'>
-					Total Cups Recycled
-				</h3>
-				<p className='text-3xl font-bold text-green-600'>
-					{userData?.recycledCups || 0}
-				</p>
-			</motion.div>
+  const StatsGrid = () => (
+    <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-12">
+      {/* Total Cups Recycled */}
+      <motion.div
+        whileHover={{ scale: 1.05 }}
+        className="bg-white rounded-xl shadow-lg p-6"
+      >
+        <h3 className="text-lg font-semibold text-gray-700 mb-2">
+          Total Cups Recycled
+        </h3>
+        <p className="text-3xl font-bold text-green-600">
+          {userData?.recycledCups || 0}
+        </p>
+      </motion.div>
 
-			{/* Environmental Impact */}
-			<motion.div
-				whileHover={{ scale: 1.05 }}
-				className='bg-white rounded-xl shadow-lg p-6'
-			>
-				<h3 className='text-lg font-semibold text-gray-700 mb-2'>
-					Trees Saved
-				</h3>
-				<p className='text-3xl font-bold text-green-600'>
-					{((userData?.recycledCups || 0) * 0.0005).toFixed(2)}
-				</p>
-			</motion.div>
+      {/* Environmental Impact */}
+      <motion.div
+        whileHover={{ scale: 1.05 }}
+        className="bg-white rounded-xl shadow-lg p-6"
+      >
+        <h3 className="text-lg font-semibold text-gray-700 mb-2">
+          Trees Saved
+        </h3>
+        <p className="text-3xl font-bold text-green-600">
+          {((userData?.recycledCups || 0) * 0.0005).toFixed(2)}
+        </p>
+      </motion.div>
 
-			{/* Achievements */}
-			<motion.div
-				whileHover={{ scale: 1.05 }}
-				className='bg-white rounded-xl shadow-lg p-6'
-			>
-				<h3 className='text-lg font-semibold text-gray-700 mb-2'>
-					Achievements
-				</h3>
-				<p className='text-3xl font-bold text-green-600'>
-					{achievements.length}
-				</p>
-			</motion.div>
+      {/* Achievements */}
+      <motion.div
+        whileHover={{ scale: 1.05 }}
+        className="bg-white rounded-xl shadow-lg p-6"
+      >
+        <h3 className="text-lg font-semibold text-gray-700 mb-2">
+          Achievements
+        </h3>
+        <p className="text-3xl font-bold text-green-600">
+          {achievements.length}
+        </p>
+      </motion.div>
 
       {/* Current Streak */}
       <motion.div
@@ -479,7 +502,9 @@ const Encourage = () => {
   const MetricsForm = () => (
     <form onSubmit={changeMetrics} className="mt-4 space-y-4">
       <div className="mb-4">
-        <label className="block text-gray-700 font-medium mb-2">Total Recycled Cups</label>
+        <label className="block text-gray-700 font-medium mb-2">
+          Total Recycled Cups
+        </label>
         <input
           type="text"
           name="recycledCups"
@@ -492,7 +517,9 @@ const Encourage = () => {
         />
       </div>
       <div className="mb-4">
-        <label className="block text-gray-700 font-medium mb-2">Daily Cup Usage</label>
+        <label className="block text-gray-700 font-medium mb-2">
+          Daily Cup Usage
+        </label>
         <input
           type="text"
           name="dailyCupUsage"
@@ -515,7 +542,7 @@ const Encourage = () => {
           type="submit"
           className="bg-green-500 text-white px-4 py-2 rounded hover:bg-green-600"
         >
-          Update Metrics
+          Update Contribution
         </button>
       </div>
     </form>
@@ -529,23 +556,33 @@ const Encourage = () => {
       <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
         <div className="p-4 bg-red-50 rounded-lg">
           <p className="font-semibold text-red-700">BPA</p>
-          <p className="text-2xl font-bold text-red-600">{chemicalImpact.bpa} mg</p>
+          <p className="text-2xl font-bold text-red-600">
+            {chemicalImpact.bpa} mg
+          </p>
         </div>
         <div className="p-4 bg-purple-50 rounded-lg">
           <p className="font-semibold text-purple-700">Phthalates</p>
-          <p className="text-2xl font-bold text-purple-600">{chemicalImpact.phthalates} mg</p>
+          <p className="text-2xl font-bold text-purple-600">
+            {chemicalImpact.phthalates} mg
+          </p>
         </div>
         <div className="p-4 bg-yellow-50 rounded-lg">
           <p className="font-semibold text-yellow-700">Dioxins</p>
-          <p className="text-2xl font-bold text-yellow-600">{chemicalImpact.dioxins} µg</p>
+          <p className="text-2xl font-bold text-yellow-600">
+            {chemicalImpact.dioxins} µg
+          </p>
         </div>
         <div className="p-4 bg-pink-50 rounded-lg">
           <p className="font-semibold text-pink-700">Styrene</p>
-          <p className="text-2xl font-bold text-pink-600">{chemicalImpact.styrene} mg</p>
+          <p className="text-2xl font-bold text-pink-600">
+            {chemicalImpact.styrene} mg
+          </p>
         </div>
         <div className="p-4 bg-violet-50 rounded-lg">
           <p className="font-semibold text-violet-700">Polyethylene</p>
-          <p className="text-2xl font-bold text-violet-600">{chemicalImpact.polyethylene} g</p>
+          <p className="text-2xl font-bold text-violet-600">
+            {chemicalImpact.polyethylene} g
+          </p>
         </div>
       </div>
     </div>
@@ -570,124 +607,134 @@ const Encourage = () => {
               beginAtZero: true,
               title: {
                 display: true,
-                text: 'Amount (mg)'
-              }
-            }
+                text: "Amount (mg)",
+              },
+            },
           },
           plugins: {
             title: {
               display: true,
-              text: 'Harmful Chemicals Avoided Through Recycling'
+              text: "Harmful Chemicals Avoided Through Recycling",
             },
             tooltip: {
               callbacks: {
                 label: (context) => {
-                  const label = context.dataset.label || '';
+                  const label = context.dataset.label || "";
                   const value = context.parsed.y;
                   return `${label}: ${value.toFixed(2)} mg`;
-                }
-              }
-            }
-          }
+                },
+              },
+            },
+          },
         }}
       />
     </div>
   );
 
-const ChartSection = () => (
+  const ChartSection = () => (
     <div>
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-12">
         <div className="bg-white rounded-xl shadow-lg p-6">
-          <h3 className="text-lg font-semibold text-gray-700 mb-4">Weekly Progress</h3>
-          <Line data={createProgressChartConfig(userData?.weeklyProgress)} options={{ maintainAspectRatio: true }} />
+          <h3 className="text-lg font-semibold text-gray-700 mb-4">
+            Weekly Progress
+          </h3>
+          <Line
+            data={createProgressChartConfig(userData?.weeklyProgress)}
+            options={{ maintainAspectRatio: true }}
+          />
         </div>
         <div className="bg-white rounded-xl shadow-lg p-6">
-          <h3 className="text-lg font-semibold text-gray-700 mb-4">Leaderboard</h3>
-          <Bar data={createLeaderboardChartConfig(leaderboard)} options={{ maintainAspectRatio: true }} />
+          <h3 className="text-lg font-semibold text-gray-700 mb-4">
+            Leaderboard
+          </h3>
+          <Bar
+            data={createLeaderboardChartConfig(leaderboard)}
+            options={{ maintainAspectRatio: true }}
+          />
         </div>
       </div>
     </div>
   );
 
-	if (loading) {
-		return (
-			<BaseLayout>
-				<div className='min-h-screen flex items-center justify-center bg-gradient-to-br from-green-50 to-teal-50'>
-					<div className='text-center'>
-						<div className='animate-spin rounded-full h-12 w-12 border-b-2 border-green-500 mx-auto'></div>
-						<p className='mt-4 text-gray-600'>Loading your green journey...</p>
-					</div>
-				</div>
-			</BaseLayout>
-		);
-	}
+  if (loading) {
+    return (
+      <BaseLayout>
+        <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-green-50 to-teal-50">
+          <div className="text-center">
+            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-green-500 mx-auto"></div>
+            <p className="mt-4 text-gray-600">Loading your green journey...</p>
+          </div>
+        </div>
+      </BaseLayout>
+    );
+  }
 
-	if (error) {
-		return (
-			<BaseLayout>
-				<div className='min-h-screen flex items-center justify-center bg-gradient-to-br from-green-50 to-teal-50'>
-					<div className='text-center p-8 bg-white rounded-lg shadow-lg'>
-						<h2 className='text-2xl font-bold text-red-600 mb-4'>
-							Oops! Something went wrong
-						</h2>
-						<p className='text-gray-600 mb-4'>{error}</p>
-						<button
-							onClick={() => window.location.reload()}
-							className='bg-green-500 text-white px-4 py-2 rounded hover:bg-green-600'
-						>
-							Try Again
-						</button>
-					</div>
-				</div>
-			</BaseLayout>
-		);
-	}
+  if (error) {
+    return (
+      <BaseLayout>
+        <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-green-50 to-teal-50">
+          <div className="text-center p-8 bg-white rounded-lg shadow-lg">
+            <h2 className="text-2xl font-bold text-red-600 mb-4">
+              Oops! Something went wrong
+            </h2>
+            <p className="text-gray-600 mb-4">{error}</p>
+            <button
+              onClick={() => window.location.reload()}
+              className="bg-green-500 text-white px-4 py-2 rounded hover:bg-green-600"
+            >
+              Try Again
+            </button>
+          </div>
+        </div>
+      </BaseLayout>
+    );
+  }
 
-	return (
-		<BaseLayout>
-			<div className='min-h-screen bg-gradient-to-br from-green-50 to-teal-50 p-6'>
-				<div className='max-w-7xl mx-auto'>
-					{/* Motivational Quote */}
-					<motion.div
-						initial={{ opacity: 0, y: 20 }}
-						animate={{ opacity: 1, y: 0 }}
-						className='text-center mb-12'
-					>
-						<h1 className='text-4xl font-bold text-green-800 mb-4'>
-							Your Green Journey
-						</h1>
-						<p className='text-xl text-green-600 italic'>
-							{userData?.username},{" "}
-							{quotes[Math.floor(Math.random() * quotes.length)]}
-						</p>
-					</motion.div>
+  return (
+    <BaseLayout>
+      <div className="min-h-screen bg-gradient-to-br from-green-50 to-teal-50 p-6">
+        <div className="max-w-7xl mx-auto">
+          {/* Motivational Quote */}
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            className="text-center mb-12"
+          >
+            <h1 className="text-4xl font-bold text-green-800 mb-4">
+              Your Green Journey
+            </h1>
+            <p className="text-xl text-green-600 italic">
+              {userData?.username},{" "}
+              {quotes[Math.floor(Math.random() * quotes.length)]}
+            </p>
+          </motion.div>
 
-					{/* Progress to Next Milestone */}
-					<motion.div
-						whileHover={{ scale: 1.02 }}
-						className='bg-white rounded-xl shadow-lg p-6 mb-8'
-					>
-						<h3 className='text-xl font-bold text-green-800 mb-4'>
-							Road to Next Milestone: {nextMilestone}
-						</h3>
-						<div className='w-full bg-gray-200 rounded-full h-4'>
-							<div
-								className='bg-green-600 rounded-full h-4 transition-all duration-500'
-								style={{
-									width: `${
-										((userData?.recycledCups % nextMilestone) / nextMilestone) *
-										100
-									}%`,
-								}}
-							/>
-						</div>
-						<p className='text-gray-600 mt-2'>
-							{userData?.recycledCups || 0} / {nextMilestone} cups
-						</p>
-					</motion.div>
+          {/* Progress to Next Milestone */}
+          <motion.div
+            whileHover={{ scale: 1.02 }}
+            className="bg-white rounded-xl shadow-lg p-6 mb-8"
+          >
+            <h3 className="text-xl font-bold text-green-800 mb-4">
+              Road to Next Milestone: {nextMilestone}
+            </h3>
+            <div className="w-full bg-gray-200 rounded-full h-4">
+              <div
+                className="bg-green-600 rounded-full h-4 transition-all duration-500"
+                style={{
+                  width: `${
+                    ((userData?.recycledCups % nextMilestone) / nextMilestone) *
+                    100
+                  }%`,
+                }}
+              />
+            </div>
+            <p className="text-gray-600 mt-2">
+              {userData?.recycledCups || 0} / {nextMilestone} cups
+            </p>
+          </motion.div>
 
-					{/* Stats Grid */}
-					<StatsGrid />
+          {/* Stats Grid */}
+          <StatsGrid />
 
           {/* Environmental Impact */}
           <motion.div className="bg-white rounded-xl shadow-lg p-6 mb-8">
@@ -701,19 +748,25 @@ const ChartSection = () => (
               <div className="flex flex-col justify-center">
                 <div className="mb-4">
                   <p className="text-lg font-semibold">Trees Spared</p>
-                  <p className="text-3xl font-bold text-green-600">{stats.treesSpared}</p>
+                  <p className="text-3xl font-bold text-green-600">
+                    {stats.treesSpared}
+                  </p>
                 </div>
                 <div className="mb-4">
                   <p className="text-lg font-semibold">Water Saved</p>
-                  <p className="text-3xl font-bold text-blue-600">{stats.waterSaved}L</p>
+                  <p className="text-3xl font-bold text-blue-600">
+                    {stats.waterSaved}L
+                  </p>
                 </div>
                 <div>
                   <p className="text-lg font-semibold">CO2 Reduced</p>
-                  <p className="text-3xl font-bold text-teal-600">{stats.co2Reduced}kg</p>
+                  <p className="text-3xl font-bold text-teal-600">
+                    {stats.co2Reduced}kg
+                  </p>
                 </div>
               </div>
             </div>
-            <button 
+            <button
               onClick={() => setShowMetricsForm(true)}
               className="mt-4 bg-green-500 text-white px-4 py-2 rounded hover:bg-green-600"
             >
@@ -728,7 +781,6 @@ const ChartSection = () => (
           {/* Charts */}
           <ChartSection />
 
-          
           {/* Achievements Gallery with Sharing */}
           <motion.div className="bg-white rounded-xl shadow-lg p-6">
             <h3 className="text-xl font-bold text-green-800 mb-4">
@@ -751,7 +803,8 @@ const ChartSection = () => (
                     />
                   </div>
                   <p className="text-sm text-green-600 mb-3">
-                    Achieved on {new Date(achievement.achievedAt).toLocaleDateString()}
+                    Achieved on{" "}
+                    {new Date(achievement.achievedAt).toLocaleDateString()}
                   </p>
                   <div className="flex space-x-2">
                     <button
@@ -785,14 +838,20 @@ const ChartSection = () => (
               >
                 <div id="certificate" className="certificate-container">
                   <div className="bg-white p-8 rounded-lg border-8 border-green-600 text-center">
-                    <h1 className="text-3xl font-bold mb-4">Certificate of Achievement</h1>
+                    <h1 className="text-3xl font-bold mb-4">
+                      Certificate of Achievement
+                    </h1>
                     <p className="text-xl mb-2">This certifies that</p>
-                    <h2 className="text-2xl font-bold mb-4">{userData?.username || 'User'}</h2>
+                    <h2 className="text-2xl font-bold mb-4">
+                      {userData?.username || "User"}
+                    </h2>
                     <p className="text-xl mb-4">has successfully recycled</p>
                     <h3 className="text-4xl font-bold text-green-600 mb-4">
                       {selectedAchievement.milestone} Cups
                     </h3>
-                    <p className="text-lg mb-4">Contributing to a greener planet</p>
+                    <p className="text-lg mb-4">
+                      Contributing to a greener planet
+                    </p>
                     <p className="text-md">{new Date().toLocaleDateString()}</p>
                   </div>
                 </div>

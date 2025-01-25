@@ -86,7 +86,7 @@ def main():
         unsafe_allow_html=True
     )
 
-    st.title("Cup Karma Feedback Generator")
+    st.title("Eco Brew Feedback Generator")
 
     if 'token' not in st.session_state:
         username = st.text_input("Enter your Username:")

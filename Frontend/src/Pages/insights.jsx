@@ -1,9 +1,11 @@
 import { useState, useEffect } from "react";
 import axios from "axios";
+import { useNavigate } from "react-router-dom";
 import "./insights.css";
 import BaseLayout from "../Layouts/BaseLayout";
 
 const Insights = () => {
+	const navigate = useNavigate();
 	const [news, setNews] = useState([]);
 	const [loading, setLoading] = useState(true);
 
@@ -98,7 +100,11 @@ const Insights = () => {
 					) : (
 						<div className='news-grid'>
 							{news.map((article, index) => (
-								<div key={index} className='news-card'>
+								<div
+									key={index}
+									className='news-card clickable'
+									onClick={() => navigate(`/news/${index}`, { state: { article } })}
+								>
 									<h3>{article.title}</h3>
 									<p>{article.description}</p>
 									<div className='news-meta'>

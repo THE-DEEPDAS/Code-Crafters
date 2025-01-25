@@ -88,7 +88,7 @@ class FeedbackGenerator:
         }
 
     def generate_feedback_streamlit(self):
-        st.title("Cup Karma Feedback Generator")
+        st.title("Eco Brew Feedback Generator")
 
         recycled_cups = st.number_input("Enter the number of recycled cups:", min_value=0, value=0)
         daily_usage = st.number_input("Enter your daily cup usage:", min_value=0, value=0)
@@ -108,7 +108,7 @@ class FeedbackGenerator:
             st.json(stats)
 
     def generate_feedback_streamlit_with_db(self, user_id: str):
-        st.title("Cup Karma Feedback Generator")
+        st.title("Eco Brew Feedback Generator")
 
         try:
             response = requests.get(f"http://localhost:3000/api/user/{user_id}")

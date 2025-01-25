@@ -8,7 +8,7 @@ const Navbar = () => {
         <div className="flex items-center">
           <img
             src=".\src\assets\ecobrew.png"
-            alt="Cup Karma Logo"
+            alt="Eco Brew Logo"
             className="h-12 w-12 mr-4"
           />
           <h1 className="text-white font-bold text-xl">EcoBrew</h1>
@@ -17,16 +17,11 @@ const Navbar = () => {
         {/* Navigation Links */}
         <ul className="flex items-center gap-6">
           <li>
-            <Link to="/" className="text-white hover:text-blue-200 font-semibold">
-              Home
-            </Link>
-          </li>
-          <li>
             <Link
-              to="/insights"
+              to="/"
               className="text-white hover:text-blue-200 font-semibold"
             >
-              Insights
+              Home
             </Link>
           </li>
           <li>
@@ -39,12 +34,20 @@ const Navbar = () => {
           </li>
           <li>
             <a
-              href="https://cup-karma-insights.streamlit.app"
+              href="https://ecobrew-insights.streamlit.app/"
               rel="noopener noreferrer"
               className="text-white hover:text-blue-200 font-semibold"
             >
               Recommendations
             </a>
+          </li>
+          <li>
+            <Link
+              to="/insights"
+              className="text-white hover:text-blue-200 font-semibold"
+            >
+              Insights
+            </Link>
           </li>
           <li>
             <Link
@@ -56,18 +59,18 @@ const Navbar = () => {
           </li>
           <li>
             <Link
-              to="/signin"
-              className="bg-white text-[#8Ed081] hover:bg-gray-100 px-4 py-2 rounded-md font-semibold transition-colors duration-200"
-            >
-              Sign In
-            </Link>
-          </li>
-          <li>
-            <Link
               to="/signup"
               className="bg-white text-[#8Ed081] hover:bg-gray-100 px-4 py-2 rounded-md font-semibold transition-colors duration-200"
             >
               Sign Up
+            </Link>
+          </li>
+          <li>
+            <Link
+              to="/signin"
+              className="bg-white text-[#8Ed081] hover:bg-gray-100 px-4 py-2 rounded-md font-semibold transition-colors duration-200"
+            >
+              Sign In
             </Link>
           </li>
         </ul>
