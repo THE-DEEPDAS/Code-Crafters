@@ -193,4 +193,10 @@ router.get("/stats/user", auth, async (req, res) => {
 router.get("/stats/leaderboard", auth, achievementController.getLeaderboard);
 router.get("/stats/achievements", auth, achievementController.getUserAchievements);
 
+// Add the missing POST route for creating achievements
+router.post("/stats/achievements", auth, (req, res, next) => {
+  console.log("Received POST /stats/achievements");
+  next();
+}, achievementController.createAchievement);
+
 module.exports = router;

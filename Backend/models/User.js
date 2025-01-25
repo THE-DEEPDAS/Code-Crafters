@@ -34,6 +34,10 @@ const UserSchema = new mongoose.Schema({
     count: { type: Number, default: 0 },
     lastUpdated: { type: Date, default: Date.now }
   },
+  achievementCount: {
+    type: Number,
+    default: 0
+  },
   createdAt: {
     type: Date,
     default: Date.now

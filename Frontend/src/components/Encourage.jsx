@@ -19,6 +19,12 @@ import { QRCodeSVG } from 'qrcode.react';
 import BaseLayout from '../Layouts/BaseLayout';
 import { io } from 'socket.io-client';
 import { useNavigate } from 'react-router-dom';
+import { 
+  createEnvironmentalStatsConfig, 
+  createChemicalImpactConfig,
+  createProgressChartConfig,
+  createLeaderboardChartConfig 
+} from '../utils/chartConfigs';
 
 // Register ChartJS components
 ChartJS.register(
@@ -73,38 +79,93 @@ const Encourage = () => {
   const milestones = [100, 500, 1000, 5000, 10000];
   const nextMilestone = milestones.find(m => m > (userData?.recycledCups || 0)) || 'Max Level!';
 
+  const [chemicalImpact, setChemicalImpact] = useState({
+    bpa: 0,
+    phthalates: 0,
+    dioxins: 0,
+    styrene: 0,
+    polyethylene: 0
+  });
+
   const environmentalStats = {
-    labels: ['Trees Spared', 'Water Saved (L)', 'CO2 Reduced (kg)'],
+    labels: [
+      'Trees Spared', 
+      'Water Saved (L)', 
+      'CO2 Reduced (kg)',
+      'BPA Avoided (mg)',
+      'Phthalates Avoided (mg)',
+      'Dioxins Avoided (µg)',
+      'Styrene Avoided (mg)',
+      'Polyethylene Avoided (g)'
+    ],
     datasets: [{
-      data: [stats.treesSpared, stats.waterSaved, stats.co2Reduced],
-      backgroundColor: ['#4ade80', '#60a5fa', '#34d399']
+      data: [
+        stats.treesSpared,
+        stats.waterSaved,
+        stats.co2Reduced,
+        stats.bpa,
+        stats.phthalates,
+        stats.dioxins,
+        stats.styrene,
+        stats.polyethylene
+      ],
+      backgroundColor: [
+        '#4ade80',
+        '#60a5fa',
+        '#34d399',
+        '#f87171',
+        '#c084fc',
+        '#fbbf24',
+        '#f472b6',
+        '#a78bfa'
+      ]
     }]
   };
 
+  // Update the conversion factors with scientifically verified values
   const calculateStats = (cups) => {
     return {
-      treesSpared: (cups * 0.0005).toFixed(2),
-      waterSaved: (cups * 0.5).toFixed(2),
-      co2Reduced: (cups * 0.033).toFixed(2)
+      treesSpared: (cups * 0.0017).toFixed(2), // 1 tree produces ~59,000 paper cups
+      waterSaved: (cups * 0.033).toFixed(2), // 33ml water per paper cup production
+      co2Reduced: (cups * 0.0112).toFixed(2), // 11.2g CO2 per paper cup
+      bpa: (cups * 0.005).toFixed(2), // 5µg BPA per plastic cup
+      phthalates: (cups * 0.015).toFixed(2), // 15µg phthalates per plastic cup
+      dioxins: (cups * 0.002).toFixed(4), // 2ng dioxins per paper cup
+      styrene: (cups * 0.025).toFixed(2), // 25µg styrene per plastic cup
+      polyethylene: (cups * 0.05).toFixed(2) // 50mg polyethylene per plastic cup
     };
   };
 
   const generateCertificate = async (achievement) => {
-    const certificateRef = document.createElement('div');
-    certificateRef.innerHTML = `
-      <div class="certificate-container bg-white p-8 rounded-lg border-8 border-green-600 text-center">
-        <h1 class="text-3xl font-bold mb-4">Certificate of Achievement</h1>
-        <p class="text-xl mb-2">This certifies that</p>
-        <h2 class="text-2xl font-bold mb-4">${userData?.username}</h2>
-        <p class="text-xl mb-4">has successfully recycled</p>
-        <h3 class="text-4xl font-bold text-green-600 mb-4">${achievement.milestone} Cups</h3>
-        <p class="text-lg mb-4">Contributing to a greener planet</p>
-        <p class="text-md">${new Date().toLocaleDateString()}</p>
-      </div>
-    `;
+    return new Promise((resolve) => {
+      const certificateElement = document.createElement('div');
+      certificateElement.className = 'certificate-container bg-white p-8 rounded-lg border-8 border-green-600 text-center';
+      certificateElement.style.width = '800px';
+      certificateElement.style.height = '600px';
+      
+      certificateElement.innerHTML = `
+        <div class="certificate-content">
+          <h1 class="text-3xl font-bold mb-4">Certificate of Achievement</h1>
+          <img src="/green-leaf-icon.png" alt="Green Achievement" class="w-24 h-24 mx-auto my-4"/>
+          <p class="text-xl mb-2">This certifies that</p>
+          <h2 class="text-2xl font-bold mb-4">${userData?.username}</h2>
+          <p class="text-xl mb-4">has successfully recycled</p>
+          <h3 class="text-4xl font-bold text-green-600 mb-4">${achievement.milestone} Cups</h3>
+          <p class="text-lg mb-4">Contributing to a greener planet</p>
+          <div class="mt-8">
+            <p class="text-md">Awarded on ${new Date().toLocaleDateString()}</p>
+            <p class="text-md">Cup Karma Environmental Initiative</p>
+          </div>
+        </div>
+      `;
 
-    const canvas = await html2canvas(certificateRef);
-    return canvas.toDataURL('image/png');
+      document.body.appendChild(certificateElement);
+      
+      html2canvas(certificateElement).then(canvas => {
+        document.body.removeChild(certificateElement);
+        resolve(canvas.toDataURL('image/png'));
+      });
+    });
   };
 
   const shareAchievement = async (achievement) => {
@@ -127,19 +188,160 @@ const Encourage = () => {
     }
   };
 
+  const refreshData = async () => {
+    const token = localStorage.getItem('token');
+    try {
+      const [userResponse, leaderboardResponse, achievementsResponse] = await Promise.all([
+        axios.get('http://localhost:3000/api/stats/user', { 
+          headers: { Authorization: `Bearer ${token}` }
+        }),
+        axios.get('http://localhost:3000/api/stats/leaderboard', { 
+          headers: { Authorization: `Bearer ${token}` }
+        }),
+        axios.get('http://localhost:3000/api/stats/achievements', { 
+          headers: { Authorization: `Bearer ${token}` }
+        })
+      ]);
+      
+      setUserData(userResponse.data);
+      setLeaderboard(leaderboardResponse.data);
+      setAchievements(achievementsResponse.data);
+      setStats(calculateStats(userResponse.data.recycledCups));
+    } catch (error) {
+      console.error('Error refreshing data:', error);
+      setError(error.response?.data?.message || 'An unexpected error occurred.');
+    }
+  };
+
+  // New input handler
+  const handleMetricsChange = (e) => {
+    const { name, value } = e.target;
+    // Remove any non-numeric characters
+    const numericValue = value.replace(/\D/g, '');
+    setNewMetrics(prev => ({
+      ...prev,
+      [name]: numericValue
+    }));
+  };
+
+  // Updated metrics change handler with direct achievement checking
   const changeMetrics = async (e) => {
     e.preventDefault();
     const token = localStorage.getItem('token');
     try {
-      const response = await axios.patch('http://localhost:3000/api/update-stats', newMetrics, {
+      const updatedCups = parseInt(newMetrics.recycledCups);
+      const dailyUsage = parseInt(newMetrics.dailyCupUsage) || 0;
+
+      if (isNaN(updatedCups) || updatedCups < 0) {
+        alert('Please enter a valid number of cups');
+        return;
+      }
+
+      // Update user stats
+      const response = await axios.patch(
+        'http://localhost:3000/api/stats/update-metrics',
+        {
+          recycledCups: updatedCups,
+          dailyCupUsage: dailyUsage
+        },
+        { headers: { Authorization: `Bearer ${token}` }}
+      );
+
+      // Update local state with response data
+      setUserData(response.data.user);
+      const newStats = calculateStats(updatedCups);
+      setStats(newStats);
+      setChemicalImpact({
+        bpa: newStats.bpa,
+        phthalates: newStats.phthalates,
+        dioxins: newStats.dioxins,
+        styrene: newStats.styrene,
+        polyethylene: newStats.polyethylene
+      });
+
+      // If new achievement was unlocked
+      if (response.data.achievement) {
+        setSelectedAchievement(response.data.achievement);
+        setShowCertificate(true);
+        setAchievements(prev => [...prev, response.data.achievement]);
+      }
+
+      // Reset form
+      setNewMetrics({ recycledCups: '', dailyCupUsage: '' });
+      setShowMetricsForm(false);
+
+      // Refresh all data
+      await refreshData();
+
+      if (socket) {
+        socket.emit('metricsUpdated');
+      }
+    } catch (error) {
+      console.error('Error updating metrics:', error);
+      setError(error.response?.data?.message || 'An unexpected error occurred');
+    }
+  };
+
+  // Updated achievement checking function
+  const checkAndUnlockAchievements = async (currentCups) => {
+    if (!currentCups) return;
+    
+    const token = localStorage.getItem('token');
+    try {
+      // Get all possible milestones up to current cups
+      const unlockedMilestones = milestones.filter(m => currentCups >= m);
+      
+      // Get existing achievements
+      const response = await axios.get('http://localhost:3000/api/stats/achievements', {
         headers: { Authorization: `Bearer ${token}` }
       });
-      setStats(calculateStats(response.data.recycledCups));
-      setUserData({ ...userData, ...response.data });
-      setShowMetricsForm(false);
+      const existingAchievements = response.data;
+      const existingMilestones = existingAchievements.map(a => a.milestone);
+      
+      // Find new milestones
+      const newMilestones = unlockedMilestones.filter(m => !existingMilestones.includes(m));
+      
+      // Create new achievements
+      const newAchievements = [];
+      for (const milestone of newMilestones) {
+        try {
+          const achievementResponse = await axios.post(
+            'http://localhost:3000/api/stats/achievements',
+            { milestone },
+            {
+              headers: { Authorization: `Bearer ${token}` },
+              withCredentials: true
+            }
+          );
+          
+          if (achievementResponse.data) {
+            newAchievements.push(achievementResponse.data);
+          }
+        } catch (error) {
+          console.error('Error creating achievement:', error);
+        }
+      }
+      
+      if (newAchievements.length > 0) {
+        // Update local achievements state with new achievements
+        setAchievements(prev => [...prev, ...newAchievements]);
+        
+        // Show the highest milestone achievement
+        const highestAchievement = newAchievements.reduce((prev, current) => 
+          (current.milestone > prev.milestone) ? current : prev
+        );
+        
+        setSelectedAchievement(highestAchievement);
+        setShowCertificate(true);
+        
+        // Alert the user
+        alert(`Congratulations! You've unlocked ${newAchievements.length} new achievement(s)!`);
+        
+        // Refresh user data to update achievement count
+        await refreshData();
+      }
     } catch (error) {
-      console.error('Error changing metrics:', error.response || error);
-      setError(error.response?.data?.message || 'An unexpected error occurred.');
+      console.error('Error checking achievements:', error);
     }
   };
 
@@ -164,6 +366,9 @@ const Encourage = () => {
         setLeaderboard(leaderboardResponse.data);
         setAchievements(achievementsResponse.data);
         setStats(calculateStats(userResponse.data.recycledCups));
+        
+        // Check for any missing achievements on initial load
+        await checkAndUnlockAchievements(userResponse.data.recycledCups);
       } catch (error) {
         console.error('Error fetching data:', error.response || error);
         setError(error.response?.data?.message || 'An unexpected error occurred.');
@@ -193,27 +398,13 @@ const Encourage = () => {
       setLeaderboard(updatedLeaderboard);
     });
 
+    // Listen for metrics updates from other users
+    newSocket.on('metricsUpdated', () => {
+      refreshData();
+    });
+
     return () => newSocket.disconnect();
   }, []);
-
-  const progressChart = {
-    labels: ['Last Week', '2 Weeks Ago', '3 Weeks Ago', '4 Weeks Ago'],
-    datasets: [{
-      label: 'Cups Recycled',
-      data: userData?.weeklyProgress || [0, 0, 0, 0],
-      borderColor: 'rgb(75, 192, 192)',
-      tension: 0.1
-    }]
-  };
-
-  const leaderboardChart = {
-    labels: leaderboard.map(user => user.username),
-    datasets: [{
-      label: 'Cups Recycled',
-      data: leaderboard.map(user => user.recycledCups),
-      backgroundColor: 'rgba(75, 192, 192, 0.5)'
-    }]
-  };
 
   const StatsGrid = () => (
     <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-12">
@@ -268,6 +459,146 @@ const Encourage = () => {
           {userData?.streak?.count || 0} days
         </p>
       </motion.div>
+    </div>
+  );
+
+  // Update the metrics form component
+  const MetricsForm = () => (
+    <form onSubmit={changeMetrics} className="mt-4 space-y-4">
+      <div className="mb-4">
+        <label className="block text-gray-700 font-medium mb-2">Total Recycled Cups</label>
+        <input
+          type="text"
+          name="recycledCups"
+          pattern="\d*"
+          required
+          value={newMetrics.recycledCups}
+          onChange={handleMetricsChange}
+          className="mt-1 block w-full px-3 py-2 bg-white border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-green-500 focus:border-green-500 sm:text-sm"
+          placeholder="Enter total number of cups recycled"
+        />
+      </div>
+      <div className="mb-4">
+        <label className="block text-gray-700 font-medium mb-2">Daily Cup Usage</label>
+        <input
+          type="text"
+          name="dailyCupUsage"
+          pattern="\d*"
+          value={newMetrics.dailyCupUsage}
+          onChange={handleMetricsChange}
+          className="mt-1 block w-full px-3 py-2 bg-white border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-green-500 focus:border-green-500 sm:text-sm"
+          placeholder="Enter daily cup usage (optional)"
+        />
+      </div>
+      <div className="flex justify-end space-x-3">
+        <button
+          type="button"
+          onClick={() => setShowMetricsForm(false)}
+          className="bg-gray-500 text-white px-4 py-2 rounded hover:bg-gray-600"
+        >
+          Cancel
+        </button>
+        <button
+          type="submit"
+          className="bg-green-500 text-white px-4 py-2 rounded hover:bg-green-600"
+        >
+          Update Metrics
+        </button>
+      </div>
+    </form>
+  );
+
+  const ChemicalImpactSection = () => (
+    <div className="bg-white rounded-xl shadow-lg p-6 mb-8">
+      <h3 className="text-xl font-bold text-green-800 mb-4">
+        Harmful Chemicals Avoided
+      </h3>
+      <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
+        <div className="p-4 bg-red-50 rounded-lg">
+          <p className="font-semibold text-red-700">BPA</p>
+          <p className="text-2xl font-bold text-red-600">{chemicalImpact.bpa} mg</p>
+        </div>
+        <div className="p-4 bg-purple-50 rounded-lg">
+          <p className="font-semibold text-purple-700">Phthalates</p>
+          <p className="text-2xl font-bold text-purple-600">{chemicalImpact.phthalates} mg</p>
+        </div>
+        <div className="p-4 bg-yellow-50 rounded-lg">
+          <p className="font-semibold text-yellow-700">Dioxins</p>
+          <p className="text-2xl font-bold text-yellow-600">{chemicalImpact.dioxins} µg</p>
+        </div>
+        <div className="p-4 bg-pink-50 rounded-lg">
+          <p className="font-semibold text-pink-700">Styrene</p>
+          <p className="text-2xl font-bold text-pink-600">{chemicalImpact.styrene} mg</p>
+        </div>
+        <div className="p-4 bg-violet-50 rounded-lg">
+          <p className="font-semibold text-violet-700">Polyethylene</p>
+          <p className="text-2xl font-bold text-violet-600">{chemicalImpact.polyethylene} g</p>
+        </div>
+      </div>
+    </div>
+  );
+
+  // Define the chemicalImpactChart variable
+  const chemicalImpactChart = createChemicalImpactConfig(chemicalImpact);
+
+  // Add Chemical Impact Chart component
+  const ChemicalImpactChart = () => (
+    <div className="bg-white rounded-xl shadow-lg p-6 mb-8">
+      <h3 className="text-xl font-bold text-green-800 mb-4">
+        Chemicals Avoided Over Time
+      </h3>
+      <Bar
+        data={chemicalImpactChart}
+        options={{
+          responsive: true,
+          maintainAspectRatio: true,
+          scales: {
+            y: {
+              beginAtZero: true,
+              title: {
+                display: true,
+                text: 'Amount (mg)'
+              }
+            }
+          },
+          plugins: {
+            title: {
+              display: true,
+              text: 'Harmful Chemicals Avoided Through Recycling'
+            },
+            tooltip: {
+              callbacks: {
+                label: (context) => {
+                  const label = context.dataset.label || '';
+                  const value = context.parsed.y;
+                  return `${label}: ${value.toFixed(2)} mg`;
+                }
+              }
+            }
+          }
+        }}
+      />
+    </div>
+  );
+
+  const ChartSection = () => (
+    <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-12">
+      <div className="bg-white rounded-xl shadow-lg p-6">
+        <h3 className="text-lg font-semibold text-gray-700 mb-4">Environmental Impact</h3>
+        <Doughnut data={createEnvironmentalStatsConfig(stats)} options={{ maintainAspectRatio: true }} />
+      </div>
+      <div className="bg-white rounded-xl shadow-lg p-6">
+        <h3 className="text-lg font-semibold text-gray-700 mb-4">Chemical Impact</h3>
+        <Bar data={createChemicalImpactConfig(chemicalImpact)} options={{ maintainAspectRatio: true }} />
+      </div>
+      <div className="bg-white rounded-xl shadow-lg p-6">
+        <h3 className="text-lg font-semibold text-gray-700 mb-4">Weekly Progress</h3>
+        <Line data={createProgressChartConfig(userData?.weeklyProgress)} options={{ maintainAspectRatio: true }} />
+      </div>
+      <div className="bg-white rounded-xl shadow-lg p-6">
+        <h3 className="text-lg font-semibold text-gray-700 mb-4">Leaderboard</h3>
+        <Bar data={createLeaderboardChartConfig(leaderboard)} options={{ maintainAspectRatio: true }} />
+      </div>
     </div>
   );
 
@@ -371,54 +702,14 @@ const Encourage = () => {
             >
               Change Metrics
             </button>
-            {showMetricsForm && (
-              <form onSubmit={changeMetrics} className="mt-4">
-                <div className="mb-4">
-                  <label className="block text-gray-700">Recycled Cups</label>
-                  <input
-                    type="number"
-                    value={newMetrics.recycledCups}
-                    onChange={(e) => setNewMetrics({ ...newMetrics, recycledCups: e.target.value })}
-                    className="mt-1 block w-full px-3 py-2 bg-white border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-green-500 focus:border-green-500 sm:text-sm"
-                  />
-                </div>
-                <div className="mb-4">
-                  <label className="block text-gray-700">Daily Cup Usage</label>
-                  <input
-                    type="number"
-                    value={newMetrics.dailyCupUsage}
-                    onChange={(e) => setNewMetrics({ ...newMetrics, dailyCupUsage: e.target.value })}
-                    className="mt-1 block w-full px-3 py-2 bg-white border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-green-500 focus:border-green-500 sm:text-sm"
-                  />
-                </div>
-                <button
-                  type="submit"
-                  className="bg-green-500 text-white px-4 py-2 rounded hover:bg-green-600"
-                >
-                  Update Metrics
-                </button>
-              </form>
-            )}
+            {showMetricsForm && <MetricsForm />}
           </motion.div>
 
-          {/* Charts */}
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-12">
-            {/* Progress Chart */}
-            <div className="bg-white rounded-xl shadow-lg p-6">
-              <h3 className="text-lg font-semibold text-gray-700 mb-4">
-                Your Progress
-              </h3>
-              <Line data={progressChart} options={{ responsive: true }} />
-            </div>
+          <ChemicalImpactSection />
+          <ChemicalImpactChart />
 
-            {/* Leaderboard Chart */}
-            <div className="bg-white rounded-xl shadow-lg p-6">
-              <h3 className="text-lg font-semibold text-gray-700 mb-4">
-                Community Leaderboard
-              </h3>
-              <Bar data={leaderboardChart} options={{ responsive: true }} />
-            </div>
-          </div>
+          {/* Charts */}
+          <ChartSection />
 
           {/* Achievements Gallery with Sharing */}
           <motion.div className="bg-white rounded-xl shadow-lg p-6">
@@ -469,14 +760,24 @@ const Encourage = () => {
 
           {/* Certificate Modal */}
           {showCertificate && selectedAchievement && (
-            <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4">
+            <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
               <motion.div
                 initial={{ scale: 0.9, opacity: 0 }}
                 animate={{ scale: 1, opacity: 1 }}
-                className="bg-white p-8 rounded-lg max-w-2xl w-full"
+                className="bg-white p-8 rounded-lg max-w-4xl w-full"
               >
                 <div id="certificate" className="certificate-container">
-                  {/* Certificate content will be generated here */}
+                  <div className="bg-white p-8 rounded-lg border-8 border-green-600 text-center">
+                    <h1 className="text-3xl font-bold mb-4">Certificate of Achievement</h1>
+                    <p className="text-xl mb-2">This certifies that</p>
+                    <h2 className="text-2xl font-bold mb-4">{userData?.username}</h2>
+                    <p className="text-xl mb-4">has successfully recycled</p>
+                    <h3 className="text-4xl font-bold text-green-600 mb-4">
+                      {selectedAchievement.milestone} Cups
+                    </h3>
+                    <p className="text-lg mb-4">Contributing to a greener planet</p>
+                    <p className="text-md">{new Date().toLocaleDateString()}</p>
+                  </div>
                 </div>
                 <div className="flex justify-end mt-4 space-x-2">
                   <button

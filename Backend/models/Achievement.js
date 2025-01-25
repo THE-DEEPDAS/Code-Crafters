@@ -1,6 +1,6 @@
 const mongoose = require('mongoose');
 
-const AchievementSchema = new mongoose.Schema({
+const achievementSchema = new mongoose.Schema({
   userId: {
     type: mongoose.Schema.Types.ObjectId,
     ref: 'User',
@@ -10,18 +10,16 @@ const AchievementSchema = new mongoose.Schema({
     type: Number,
     required: true
   },
-  certificateUrl: {
-    type: String,
-    required: true
-  },
   achievedAt: {
     type: Date,
     default: Date.now
   },
-  shared: {
-    type: Boolean,
-    default: false
+  certificateUrl: {
+    type: String
   }
 });
 
-module.exports = mongoose.model('Achievement', AchievementSchema);
+// Ensure unique achievements per user and milestone
+achievementSchema.index({ userId: 1, milestone: 1 }, { unique: true });
+
+module.exports = mongoose.model('Achievement', achievementSchema);
