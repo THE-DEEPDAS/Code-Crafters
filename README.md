@@ -3,6 +3,9 @@
 ## Demo Video
 You can find it at https://drive.google.com/drive/folders/1wvuD4UyRtReF6DQI2bZ9pPxdHdil6nSv?usp=sharing
 
+## Submission Doc
+It is attached in the main repo itself, name of the file is "Team Code Crafters Submission (2).pdf"
+
 ## Table of Contents
 - [Introduction](#introduction)
 - [Impact](#impact)
