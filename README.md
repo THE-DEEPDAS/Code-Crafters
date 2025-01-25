@@ -72,7 +72,6 @@ Eco Brew deploys a robust and sophisticated technical infrastructure to ensure a
 
 - **Language and Framework:** Utilizing **Python** for developing sophisticated AI-driven feedback generators, coupled with **Streamlit** to create an interactive web interface.
 - **Functionality:** The AI component analyzes user data to deliver personalized feedback and recommendations, enhancing user engagement and promoting sustainable habits.
-- **Machine Learning Models:** Deploying advanced machine learning algorithms to accurately assess user behavior and predict future trends, enabling proactive sustainability efforts.
 - **Seamless Communication:** Ensuring seamless integration with the backend through secure API calls, allowing real-time data fetching and feedback generation.
 
 ### Real-Time Features
@@ -91,6 +90,7 @@ Eco Brew deploys a robust and sophisticated technical infrastructure to ensure a
 
 - **Frontend Deployment:** Utilizing **Vite** for optimized and rapid frontend builds, deployed seamlessly on platforms like **Vercel** or **Netlify** to ensure high availability and performance.
 - **Backend Deployment:** Hosting the backend on **Heroku** or **Vercel**, providing a scalable and reliable server environment that can handle increasing user demand.
+- **AI Deployment:** We have used streamlit to deploy the AI feature.
 - **Continuous Integration/Continuous Deployment (CI/CD):** Establishing robust CI/CD pipelines automates testing, building, and deployment processes, facilitating rapid and error-free updates.
 - **Environment Management:** Securely managing environment variables to protect sensitive information, such as API keys and database credentials, through best practices and reliable environment management tools.
 
@@ -223,19 +223,6 @@ Before installing Eco Brew, ensure you have the following installed on your syst
 - **Icons:**
   - **Lucide React:** For incorporating modern and scalable icons into the application.
 
-## Future Work
-
-To further enhance Eco Brew and expand its impact, the following developments are planned:
-
-- **Mobile Application:** Develop native mobile applications for iOS and Android to provide users with on-the-go access and notifications.
-- **Enhanced Analytics:** Implement more detailed and comprehensive analytics to offer deeper insights into user behaviors and environmental impacts.
-- **Gamification:** Introduce gamified elements such as badges, challenges, and rewards to increase user engagement and motivation.
-- **Integration with Eco-friendly Initiatives:** Partner with environmental organizations and initiatives to broaden the platform's reach and effectiveness.
-- **Advanced AI Features:** Enhance the AI feedback generator with machine learning algorithms for more personalized and context-aware feedback.
-- **Social Features:** Enable users to share achievements and progress on social media platforms to encourage widespread adoption and community growth.
-- **Localization:** Support multiple languages to cater to a global audience and promote environmental awareness worldwide.
-- **API Expansion:** Develop public APIs to allow third-party integrations and collaborations with other eco-friendly services.
-
 ## Contributing
 
 Contributions are welcome! We encourage you to fork the repository and submit pull requests for any improvements, bug fixes, or new features. Please follow these steps to contribute:
@@ -271,6 +258,3 @@ Contributions are welcome! We encourage you to fork the repository and submit pu
 
 Please ensure your contributions adhere to the project's coding standards and include appropriate documentation and tests where necessary.
 
-## License
-
-This project is licensed under the [MIT License](LICENSE). You are free to use, modify, and distribute this software as per the terms of the license. See the [LICENSE](LICENSE) file for more details.
