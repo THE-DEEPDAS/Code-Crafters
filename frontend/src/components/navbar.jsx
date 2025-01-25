@@ -34,7 +34,7 @@ const Navbar = () => {
           </li>
           <li>
             <a
-              href="https://ecobrew-insights.streamlit.app/"
+              href="http://localhost:8501/"
               rel="noopener noreferrer"
               className="text-white hover:text-blue-200 font-semibold"
             >
