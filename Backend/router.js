@@ -180,6 +180,7 @@ router.get("/stats/user", auth, async (req, res) => {
       return res.status(404).json({ message: "User not found" });
     }
     res.json({
+      username: user.username,
       recycledCups: user.recycledCups,
       dailyCupUsage: user.dailyCupUsage,
       streak: user.streak,

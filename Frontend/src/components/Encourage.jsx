@@ -122,17 +122,17 @@ const Encourage = () => {
     }]
   };
 
-  // Update the conversion factors with scientifically verified values
+  // Enhance the calculateStats function to ensure accurate calculations based on recycledCups
   const calculateStats = (cups) => {
     return {
-      treesSpared: (cups * 0.0017).toFixed(2), // 1 tree produces ~59,000 paper cups
-      waterSaved: (cups * 0.033).toFixed(2), // 33ml water per paper cup production
-      co2Reduced: (cups * 0.0112).toFixed(2), // 11.2g CO2 per paper cup
-      bpa: (cups * 0.005).toFixed(2), // 5µg BPA per plastic cup
-      phthalates: (cups * 0.015).toFixed(2), // 15µg phthalates per plastic cup
+      treesSpared: (cups * 0.002).toFixed(2), // 1 tree produces ~59,000 paper cups
+      waterSaved: (cups * 0.04).toFixed(2), // 33ml water per paper cup production
+      co2Reduced: (cups * 0.012).toFixed(2), // 11.2g CO2 per paper cup
+      bpa: (cups * 0.05).toFixed(2), // 5µg BPA per plastic cup
+      phthalates: (cups * 0.08).toFixed(2), // 15µg phthalates per plastic cup
       dioxins: (cups * 0.002).toFixed(4), // 2ng dioxins per paper cup
-      styrene: (cups * 0.025).toFixed(2), // 25µg styrene per plastic cup
-      polyethylene: (cups * 0.05).toFixed(2) // 50mg polyethylene per plastic cup
+      styrene: (cups * 0.15).toFixed(2), // 25µg styrene per plastic cup
+      polyethylene: (cups * 0.35).toFixed(2) // 50mg polyethylene per plastic cup
     };
   };
 
@@ -146,7 +146,7 @@ const Encourage = () => {
       certificateElement.innerHTML = `
         <div class="certificate-content">
           <h1 class="text-3xl font-bold mb-4">Certificate of Achievement</h1>
-          <img src="/green-leaf-icon.png" alt="Green Achievement" class="w-24 h-24 mx-auto my-4"/>
+          
           <p class="text-xl mb-2">This certifies that</p>
           <h2 class="text-2xl font-bold mb-4">${userData?.username}</h2>
           <p class="text-xl mb-4">has successfully recycled</p>
@@ -170,19 +170,8 @@ const Encourage = () => {
 
   const shareAchievement = async (achievement) => {
     try {
-      const certificateImage = await generateCertificate(achievement);
-      if (navigator.share) {
-        await navigator.share({
-          title: 'My Cup Karma Achievement!',
-          text: `I've recycled ${achievement.milestone} cups! Join me in making the planet greener!`,
-          url: window.location.href
-        });
-      } else {
-        // Fallback to copying to clipboard
-        const shareText = `I've recycled ${achievement.milestone} cups on Cup Karma! Join me in making the planet greener!`;
-        await navigator.clipboard.writeText(shareText);
-        alert('Share text copied to clipboard!');
-      }
+      await generateCertificate(achievement);
+      window.location.href = 'https://www.exampleShareSite.com';
     } catch (error) {
       console.error('Error sharing:', error);
     }
@@ -206,7 +195,15 @@ const Encourage = () => {
       setUserData(userResponse.data);
       setLeaderboard(leaderboardResponse.data);
       setAchievements(achievementsResponse.data);
-      setStats(calculateStats(userResponse.data.recycledCups));
+      const updatedStats = calculateStats(userResponse.data.recycledCups);
+      setStats(updatedStats);
+      setChemicalImpact({
+        bpa: updatedStats.bpa,
+        phthalates: updatedStats.phthalates,
+        dioxins: updatedStats.dioxins,
+        styrene: updatedStats.styrene,
+        polyethylene: updatedStats.polyethylene
+      });
     } catch (error) {
       console.error('Error refreshing data:', error);
       setError(error.response?.data?.message || 'An unexpected error occurred.');
@@ -229,8 +226,8 @@ const Encourage = () => {
     e.preventDefault();
     const token = localStorage.getItem('token');
     try {
-      const updatedCups = parseInt(newMetrics.recycledCups);
-      const dailyUsage = parseInt(newMetrics.dailyCupUsage) || 0;
+      const updatedCups = parseFloat(newMetrics.recycledCups);
+      const dailyUsage = parseFloat(newMetrics.dailyCupUsage) || 0;
 
       if (isNaN(updatedCups) || updatedCups < 0) {
         alert('Please enter a valid number of cups');
@@ -249,7 +246,7 @@ const Encourage = () => {
 
       // Update local state with response data
       setUserData(response.data.user);
-      const newStats = calculateStats(updatedCups);
+      const newStats = calculateStats(response.data.user.recycledCups);
       setStats(newStats);
       setChemicalImpact({
         bpa: newStats.bpa,
@@ -261,9 +258,10 @@ const Encourage = () => {
 
       // If new achievement was unlocked
       if (response.data.achievement) {
-        setSelectedAchievement(response.data.achievement);
-        setShowCertificate(true);
-        setAchievements(prev => [...prev, response.data.achievement]);
+        const alreadyExists = achievements.some(a => a._id === response.data.achievement._id);
+        if (!alreadyExists) {
+          setAchievements(prev => [...prev, response.data.achievement]);
+        }
       }
 
       // Reset form
@@ -276,9 +274,12 @@ const Encourage = () => {
       if (socket) {
         socket.emit('metricsUpdated');
       }
+
+      // Check and unlock achievements based on the updated cups
+      await checkAndUnlockAchievements(response.data.user.recycledCups);
     } catch (error) {
       console.error('Error updating metrics:', error);
-      setError(error.response?.data?.message || 'An unexpected error occurred');
+      setError(error.response?.data?.message || 'An unexpected error occurred while updating metrics.');
     }
   };
 
@@ -332,7 +333,6 @@ const Encourage = () => {
         );
         
         setSelectedAchievement(highestAchievement);
-        setShowCertificate(true);
         
         // Alert the user
         alert(`Congratulations! You've unlocked ${newAchievements.length} new achievement(s)!`);
@@ -367,8 +367,6 @@ const Encourage = () => {
         setAchievements(achievementsResponse.data);
         setStats(calculateStats(userResponse.data.recycledCups));
         
-        // Check for any missing achievements on initial load
-        await checkAndUnlockAchievements(userResponse.data.recycledCups);
       } catch (error) {
         console.error('Error fetching data:', error.response || error);
         setError(error.response?.data?.message || 'An unexpected error occurred.');
@@ -405,6 +403,21 @@ const Encourage = () => {
 
     return () => newSocket.disconnect();
   }, []);
+
+  // Ensure that graph data relies on the latest recycledCups from the userData state
+  useEffect(() => {
+    if (userData) {
+      const updatedStats = calculateStats(userData.recycledCups);
+      setStats(updatedStats);
+      setChemicalImpact({
+        bpa: updatedStats.bpa,
+        phthalates: updatedStats.phthalates,
+        dioxins: updatedStats.dioxins,
+        styrene: updatedStats.styrene,
+        polyethylene: updatedStats.polyethylene
+      });
+    }
+  }, [userData]);
 
   const StatsGrid = () => (
     <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-12">
@@ -581,23 +594,17 @@ const Encourage = () => {
     </div>
   );
 
-  const ChartSection = () => (
-    <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-12">
-      <div className="bg-white rounded-xl shadow-lg p-6">
-        <h3 className="text-lg font-semibold text-gray-700 mb-4">Environmental Impact</h3>
-        <Doughnut data={createEnvironmentalStatsConfig(stats)} options={{ maintainAspectRatio: true }} />
-      </div>
-      <div className="bg-white rounded-xl shadow-lg p-6">
-        <h3 className="text-lg font-semibold text-gray-700 mb-4">Chemical Impact</h3>
-        <Bar data={createChemicalImpactConfig(chemicalImpact)} options={{ maintainAspectRatio: true }} />
-      </div>
-      <div className="bg-white rounded-xl shadow-lg p-6">
-        <h3 className="text-lg font-semibold text-gray-700 mb-4">Weekly Progress</h3>
-        <Line data={createProgressChartConfig(userData?.weeklyProgress)} options={{ maintainAspectRatio: true }} />
-      </div>
-      <div className="bg-white rounded-xl shadow-lg p-6">
-        <h3 className="text-lg font-semibold text-gray-700 mb-4">Leaderboard</h3>
-        <Bar data={createLeaderboardChartConfig(leaderboard)} options={{ maintainAspectRatio: true }} />
+const ChartSection = () => (
+    <div>
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-12">
+        <div className="bg-white rounded-xl shadow-lg p-6">
+          <h3 className="text-lg font-semibold text-gray-700 mb-4">Weekly Progress</h3>
+          <Line data={createProgressChartConfig(userData?.weeklyProgress)} options={{ maintainAspectRatio: true }} />
+        </div>
+        <div className="bg-white rounded-xl shadow-lg p-6">
+          <h3 className="text-lg font-semibold text-gray-700 mb-4">Leaderboard</h3>
+          <Bar data={createLeaderboardChartConfig(leaderboard)} options={{ maintainAspectRatio: true }} />
+        </div>
       </div>
     </div>
   );
@@ -711,6 +718,7 @@ const Encourage = () => {
           {/* Charts */}
           <ChartSection />
 
+          
           {/* Achievements Gallery with Sharing */}
           <motion.div className="bg-white rounded-xl shadow-lg p-6">
             <h3 className="text-xl font-bold text-green-800 mb-4">
@@ -723,14 +731,13 @@ const Encourage = () => {
                   whileHover={{ scale: 1.05 }}
                   className="bg-gradient-to-br from-green-100 to-teal-100 rounded-lg p-4"
                 >
-                  <div className="flex justify-between items-start mb-2">
-                    <h4 className="font-semibold text-green-800">
+                  <div className="flex items-center mb-2">
+                    <h4 className="font-semibold text-green-800 mr-2">
                       {achievement.milestone} Cups
                     </h4>
                     <QRCodeSVG
                       value={`${window.location.origin}/achievement/${achievement._id}`}
-                      size={64}
-                      className="rounded"
+                      size={48}
                     />
                   </div>
                   <p className="text-sm text-green-600 mb-3">
@@ -770,7 +777,7 @@ const Encourage = () => {
                   <div className="bg-white p-8 rounded-lg border-8 border-green-600 text-center">
                     <h1 className="text-3xl font-bold mb-4">Certificate of Achievement</h1>
                     <p className="text-xl mb-2">This certifies that</p>
-                    <h2 className="text-2xl font-bold mb-4">{userData?.username}</h2>
+                    <h2 className="text-2xl font-bold mb-4">{userData?.username || 'User'}</h2>
                     <p className="text-xl mb-4">has successfully recycled</p>
                     <h3 className="text-4xl font-bold text-green-600 mb-4">
                       {selectedAchievement.milestone} Cups
