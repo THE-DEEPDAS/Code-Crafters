@@ -93,7 +93,7 @@ def main():
         password = st.text_input("Enter your Password:", type="password")
         
         if st.button("Sign In"):
-            response = requests.post('http://localhost:3000/api/signin', json={'username': username, 'password': password})
+            response = requests.post('https://206.189.60.142:3000/api/signin', json={'username': username, 'password': password})
             if response.status_code == 200:
                 data = response.json()
                 st.session_state.token = data['token']
@@ -110,7 +110,7 @@ def main():
             st.write(f"User ID: {user_id}")
 
             headers = {'Authorization': f'Bearer {token}'}
-            response = requests.get(f'http://localhost:3000/api/user/{user_id}', headers=headers)
+            response = requests.get(f'https://206.189.60.142:3000/api/user/{user_id}', headers=headers)
             
             if response.status_code == 200:
                 user_data = response.json()

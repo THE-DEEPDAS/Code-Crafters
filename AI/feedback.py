@@ -176,7 +176,7 @@ class FeedbackGenerator:
         st.title("Eco Brew Feedback Generator")
 
         try:
-            response = requests.get(f"http://localhost:3000/api/user/{user_id}")
+            response = requests.get(f"https://206.189.60.142:3000/api/user/{user_id}")
             response.raise_for_status()
         except requests.exceptions.RequestException as e:
             st.error(f"Failed to fetch user data: {e}")

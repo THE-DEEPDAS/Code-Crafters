@@ -188,13 +188,13 @@ const Encourage = () => {
     try {
       const [userResponse, leaderboardResponse, achievementsResponse] =
         await Promise.all([
-          axios.get("http://localhost:3000/api/stats/user", {
+          axios.get("https://206.189.60.142:3000/api/stats/user", {
             headers: { Authorization: `Bearer ${token}` },
           }),
-          axios.get("http://localhost:3000/api/stats/leaderboard", {
+          axios.get("https://206.189.60.142:3000/api/stats/leaderboard", {
             headers: { Authorization: `Bearer ${token}` },
           }),
-          axios.get("http://localhost:3000/api/stats/achievements", {
+          axios.get("https://206.189.60.142:3000/api/stats/achievements", {
             headers: { Authorization: `Bearer ${token}` },
           }),
         ]);
@@ -245,7 +245,7 @@ const Encourage = () => {
 
       // Update user stats
       const response = await axios.patch(
-        "http://localhost:3000/api/stats/update-metrics",
+        "https://206.189.60.142:3000/api/stats/update-metrics",
         {
           recycledCups: updatedCups,
           dailyCupUsage: dailyUsage,
@@ -308,7 +308,7 @@ const Encourage = () => {
 
       // Get existing achievements
       const response = await axios.get(
-        "http://localhost:3000/api/stats/achievements",
+        "https://206.189.60.142:3000/api/stats/achievements",
         {
           headers: { Authorization: `Bearer ${token}` },
         }
@@ -326,7 +326,7 @@ const Encourage = () => {
       for (const milestone of newMilestones) {
         try {
           const achievementResponse = await axios.post(
-            "http://localhost:3000/api/stats/achievements",
+            "https://206.189.60.142:3000/api/stats/achievements",
             { milestone },
             {
               headers: { Authorization: `Bearer ${token}` },
@@ -373,13 +373,13 @@ const Encourage = () => {
       try {
         const [userResponse, leaderboardResponse, achievementsResponse] =
           await Promise.all([
-            axios.get("http://localhost:3000/api/stats/user", {
+            axios.get("https://206.189.60.142:3000/api/stats/user", {
               headers: { Authorization: `Bearer ${token}` },
             }),
-            axios.get("http://localhost:3000/api/stats/leaderboard", {
+            axios.get("https://206.189.60.142:3000/api/stats/leaderboard", {
               headers: { Authorization: `Bearer ${token}` },
             }),
-            axios.get("http://localhost:3000/api/stats/achievements", {
+            axios.get("https://206.189.60.142:3000/api/stats/achievements", {
               headers: { Authorization: `Bearer ${token}` },
             }),
           ]);
@@ -403,7 +403,7 @@ const Encourage = () => {
 
   useEffect(() => {
     // Initialize socket connection
-    const newSocket = io("http://localhost:3000", {
+    const newSocket = io("https://206.189.60.142:3000", {
       withCredentials: true,
       extraHeaders: {
         "my-custom-header": "abcd",
