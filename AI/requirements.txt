@@ -1,3 +1,8 @@
-streamlit
-requests
+streamlit>=1.0.0
+requests>=2.25.1
 PyJWT
+nltk>=3.6.0
+python-dotenv>=0.19.0
+tenacity>=8.0.0
+transformers>=4.30.0
+torch>=2.0.0

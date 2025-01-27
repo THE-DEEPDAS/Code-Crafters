@@ -1,111 +1,176 @@
-import random
-from typing import Dict, Tuple
-import streamlit as st
+import os
+from dotenv import load_dotenv
+import time
 import requests
+import streamlit as st
+from typing import Dict, Tuple
+import nltk
+from nltk.sentiment import SentimentIntensityAnalyzer
+from transformers import pipeline
 
 class FeedbackGenerator:
     def __init__(self):
-        self.generic_messages = [
-            "🌍 Every reusable cup is a step towards a cleaner Earth! Switch to a reusable cup and inspire others.",
-            "🌱 Did you know? One reusable cup can save 365 paper cups per year! Be the change.",
-            "🌿 Paper cups take 20 years to decompose. Your switch to reusable cups can make a huge difference!",
-            "🌏 Small actions lead to big changes. Start using a reusable cup today!",
-            "🌎 Help reduce waste by using a reusable cup. Every effort counts!",
-            "🌍 Be a hero for the planet. Switch to reusable cups and reduce waste!",
-            "🌱 Your choice to use a reusable cup can inspire others to do the same.",
-            "🌿 Make a positive impact on the environment by using a reusable cup.",
-            "🌏 Every reusable cup used is one less paper cup in the landfill.",
-            "🌎 Join the movement to reduce waste by using a reusable cup."
-        ]
-        
-        self.usage_based_messages = [
-            "You've recycled {cups} cups! That's like saving {trees:.1f} trees! Keep going! 🌳",
-            "Wonderful! {cups} recycled cups means {water:.1f} gallons of water saved! 💧",
-            "Amazing! By recycling {cups} cups, you've reduced carbon emissions equivalent to {miles:.1f} miles of driving! 🚗",
-            "Great job! {cups} recycled cups have saved {trees:.1f} trees from being cut down! 🌲",
-            "Fantastic! {cups} recycled cups have conserved {water:.1f} gallons of water! 💦",
-            "Impressive! {cups} recycled cups have reduced CO2 emissions by {miles:.1f} miles of driving! 🚙",
-            "Keep it up! {cups} recycled cups have saved {trees:.1f} trees! 🌴",
-            "Awesome! {cups} recycled cups have saved {water:.1f} gallons of water! 🚰",
-            "Excellent! {cups} recycled cups have reduced carbon emissions by {miles:.1f} miles of driving! 🚕",
-            "Bravo! {cups} recycled cups have saved {trees:.1f} trees! 🌳"
-        ]
-        
-        self.daily_usage_messages = [
-            "Using {daily} cups daily adds up to {yearly} cups yearly. Try reducing it by one cup this week! 🎯",
-            "Your daily usage of {daily} cups contributes to {yearly} cups annually. Small changes make big impacts! ⭐",
-            "With {daily} cups daily, you could save ₹{yearly_cost:.2f} yearly by switching to a reusable cup! 💰",
-            "Reducing your daily usage of {daily} cups can save {yearly} cups annually. Give it a try! 🌟",
-            "By cutting down to {daily} cups daily, you can save {yearly} cups each year. Every bit helps! 🌠",
-            "Switching to a reusable cup for {daily} daily uses can save you ₹{yearly_cost:.2f} annually! 💵",
-            "Try reducing your daily cup usage to {daily} cups. It adds up to {yearly} cups yearly! 🌠",
-            "Cutting down to {daily} cups daily can save you ₹{yearly_cost:.2f} each year. Start today! 💲",
-            "Using {daily} cups daily means {yearly} cups yearly. Reduce it and make a difference! 🌟",
-            "Switch to a reusable cup for {daily} daily uses and save ₹{yearly_cost:.2f} annually! 💸"
-        ]
+        load_dotenv()
+        # Initialize Hugging Face pipeline for text generation
+        try:
+            self.generator = pipeline('text-generation', 
+                                   model='gpt2',
+                                   max_length=100)
+            self.classifier = pipeline('sentiment-analysis',
+                                    model='distilbert-base-uncased-finetuned-sst-2-english')
+        except Exception as e:
+            st.error(f"Error initializing models: {str(e)}")
+            self.generator = None
+            self.classifier = None
 
-    def calculate_environmental_impact(self, recycled_cups: int) -> Dict:
+        try:
+            nltk.download('vader_lexicon', quiet=True)
+            self.sia = SentimentIntensityAnalyzer()
+        except Exception as e:
+            st.error(f"Error initializing NLTK: {str(e)}")
+            self.sia = None
+
+        self.eco_templates = {
+            'generic': [
+                "Using reusable cups helps create a sustainable future. Every small action counts!",
+                "Together we can reduce waste by choosing reusable options.",
+                "Your commitment to using reusable cups makes a real difference!"
+            ],
+            'impact': [
+                "You've helped save {} trees and reduced CO2 emissions significantly!",
+                "Your {} recycled cups have prevented {} kg of waste!",
+                "By recycling {} cups, you've saved {} liters of water!"
+            ],
+            'daily': [
+                "Reducing your daily {} cups could save {} cups annually!",
+                "Using {} fewer disposable cups daily adds up to {} yearly!",
+                "Your daily reduction of {} cups prevents {} kg of waste yearly!"
+            ]
+        }
+
+    def generate_ai_message(self, prompt: str, min_positivity: float = 0.2) -> Dict:
+        """Generate message using local models and templates with better error handling"""
+        try:
+            if not self.generator:
+                return self._generate_template_response(prompt)
+
+            # Generate text using the local model
+            try:
+                generated = self.generator(prompt, 
+                                        max_length=100, 
+                                        num_return_sequences=1,
+                                        pad_token_id=50256)[0]['generated_text']
+                
+                message = generated.replace(prompt, '').strip()
+                message = message.split('.')[0] + '.'  # Keep first sentence
+                
+                sentiment = self.analyze_sentiment(message)
+                
+                if sentiment['scores']['compound'] < min_positivity:
+                    return self._generate_template_response(prompt)
+                    
+                return {
+                    'message': message,
+                    'sentiment': sentiment
+                }
+                
+            except Exception as model_error:
+                st.warning(f"Model generation failed, using template: {str(model_error)}")
+                return self._generate_template_response(prompt)
+            
+        except Exception as e:
+            st.error(f"Generation Error: {str(e)}")
+            return self._generate_template_response(prompt)
+
+    def _generate_template_response(self, prompt: str) -> Dict:
+        """Generate a response using templates with sentiment analysis"""
+        message = self._get_template_message(prompt)
         return {
-            'trees': recycled_cups * 0.0005,  # Each 2000 cups = 1 tree
-            'water': recycled_cups * 0.05,    # Gallons of water saved per cup
-            'miles': recycled_cups * 0.1      # CO2 equivalent in driving miles
+            'message': message,
+            'sentiment': self.analyze_sentiment(message) if self.sia else {
+                'scores': {'pos': 0.8, 'neu': 0.2, 'neg': 0.0, 'compound': 0.8}
+            }
+        }
+
+    def _get_template_message(self, prompt: str) -> str:
+        """Get a message from templates based on prompt type and context"""
+        import random
+        import re
+
+        # Extract numbers safely using regex
+        numbers = [int(num) for num in re.findall(r'\d+', prompt)]
+        cups = numbers[0] if numbers else 0
+
+        # Parse prompt content more safely
+        prompt_lower = prompt.lower()
+        
+        # Choose appropriate template
+        if any(word in prompt_lower for word in ['sustainability', 'eco-friendly']):
+            return random.choice(self.eco_templates['generic'])
+        
+        elif any(word in prompt_lower for word in ['recycling', 'recycled']):
+            if cups > 0:
+                trees = round(cups * 0.0005, 2)
+                water = round(cups * 0.5, 2)
+                template = random.choice(self.eco_templates['impact'])
+                return template.format(
+                    trees if 'trees' in prompt_lower else cups,
+                    cups,
+                    water
+                )
+            return random.choice(self.eco_templates['generic'])
+        
+        else:  # daily usage
+            daily = cups if cups > 0 else 1
+            yearly = daily * 365
+            waste = round(yearly * 0.01, 2)
+            template = random.choice(self.eco_templates['daily'])
+            return template.format(daily, yearly)
+
+    def analyze_sentiment(self, text: str) -> Dict:
+        """Analyze sentiment and return detailed scores"""
+        scores = self.sia.polarity_scores(text)
+        return {
+            'sentiment': 'positive' if scores['compound'] > 0 else 'negative' if scores['compound'] < 0 else 'neutral',
+            'scores': scores,
+            'original_text': text
         }
 
     def generate_feedback(self, recycled_cups: int, daily_usage: int) -> Tuple[str, str, str]:
-        # Generic suggestion
-        generic = random.choice(self.generic_messages)
-        
-        # Recycling-based suggestion
-        impact = self.calculate_environmental_impact(recycled_cups)
-        usage = random.choice(self.usage_based_messages).format(
-            cups=recycled_cups,
-            trees=impact['trees'],
-            water=impact['water'],
-            miles=impact['miles']
-        )
-        
-        # Daily usage-based suggestion
-        yearly_cups = daily_usage * 365
-        yearly_cost = yearly_cups * 0.50  # Assuming ₹0.50 per paper cup
-        daily = random.choice(self.daily_usage_messages).format(
-            daily=daily_usage,
-            yearly=yearly_cups,
-            yearly_cost=yearly_cost
-        )
-        
-        return (generic, usage, daily)
+        total_co2 = recycled_cups * 0.012
+        total_water = recycled_cups * 0.04
+        daily_co2 = daily_usage * 0.012
+        daily_water = daily_usage * 0.04
 
-    def get_stats(self, recycled_cups: int, daily_usage: int) -> Dict:
-        impact = self.calculate_environmental_impact(recycled_cups)
-        return {
-            "recycled_cups": recycled_cups,
-            "daily_usage": daily_usage,
-            "trees_saved": impact['trees'],
-            "water_saved": impact['water'],
-            "emissions_saved": impact['miles'],
-            "yearly_cups": daily_usage * 365,
-            "yearly_cost": (daily_usage * 365 * 0.50)
-        }
+        # Generate a motivational message for generic
+        generic_msg = f"Great job on recycling {recycled_cups} cups! Keep up the good work to make a positive impact on the environment."
+
+        # Provide a real actionable tip for usage
+        if recycled_cups > 1000:
+            usage_msg = "You've recycled a significant number of cups! Consider sharing your experience with others to inspire them."
+        else:
+            usage_msg = "Keep recycling and encourage your friends and family to join you in making a difference."
+
+        # Provide a real actionable tip for daily usage
+        if daily_usage > 5:
+            daily_msg = "Try reducing your daily cup usage by bringing your own reusable cup to work or school."
+        else:
+            daily_msg = "You're doing great! Keep using your reusable cup to further reduce waste."
+
+        return generic_msg, usage_msg, daily_msg
 
     def generate_feedback_streamlit(self):
-        st.title("Eco Brew Feedback Generator")
-
+        st.title("AI-Powered Eco Brew Feedback Generator")
+        
         recycled_cups = st.number_input("Enter the number of recycled cups:", min_value=0, value=0)
         daily_usage = st.number_input("Enter your daily cup usage:", min_value=0, value=0)
 
-        if st.button("Generate Feedback"):
-            generic, usage, daily = self.generate_feedback(recycled_cups, daily_usage)
-            st.subheader("Generic Feedback")
-            st.write(generic)
-            st.subheader("Usage-Based Feedback")
-            st.write(usage)
-            st.subheader("Daily Usage-Based Feedback")
-            st.write(daily)
-
-        if st.button("Show Stats"):
-            stats = self.get_stats(recycled_cups, daily_usage)
-            st.subheader("Statistics")
-            st.json(stats)
+        if st.button("Generate AI Feedback"):
+            with st.spinner("Generating personalized feedback..."):
+                g_msg, u_msg, d_msg = self.generate_feedback(recycled_cups, daily_usage)
+                st.write(g_msg)
+                st.write(u_msg)
+                st.write(d_msg)
 
     def generate_feedback_streamlit_with_db(self, user_id: str):
         st.title("Eco Brew Feedback Generator")

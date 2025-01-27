@@ -4,7 +4,7 @@ import requests
 import jwt
 import streamlit.components.v1 as components
 
-def main():
+def main(): 
     st.markdown(
         """
         <style>
